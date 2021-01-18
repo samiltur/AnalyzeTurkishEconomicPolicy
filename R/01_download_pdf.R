@@ -27,6 +27,6 @@ program_links
 
 for (i in 1:length(program_links)){
   if(!file.exists(here(directory, basename(program_links[i])))){
-    download.file(paste0(root_url, program_links[i]), here(directory, basename(program_links[i])))
+    download.file(paste0(root_url, program_links[i]), here(directory, basename(program_links[i])), mode = "wb")
   }
 }
