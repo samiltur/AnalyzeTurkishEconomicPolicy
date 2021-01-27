@@ -9,7 +9,9 @@ library(SnowballC)
 library(textreadr)
 library(magrittr)
 library(stopwords)
+library(tesseract)
 
+tesseract_download("tur")
 stopwords::stopwords_getlanguages(source = "stopwords-iso")
 
 Sys.setlocale(category = "LC_ALL", locale = "Turkish")
@@ -32,8 +34,32 @@ programs <- read_dir(
   ocr = TRUE
 )
 colnames(programs) <- c("doc_id", "text")
-textmin <- Corpus(DataframeSource(programs))
 
+applyOcr <- function(program_id)
+{
+  pngfiles <- pdftools::pdf_convert(here(directory, program_id),
+                                    format = "png",
+                                    pages = NULL,
+                                    dpi = 600,
+                                    antialias = TRUE,
+                                    filenames = "page_%04d.%s",
+                                    verbose = TRUE)
+  
+  program <- ocr(pngfiles, tesseract("tur"))
+  unlink(pngfiles, TRUE, TRUE, TRUE)
+  program <- textshape::combine(program)
+  program <- gsub("\r?\n|\r", " ", program)
+  df <- data.frame(doc_id = program_id, text = program)
+  return(df)
+}
+# TODO: Should sense and automatically apply ocr
+p2017_id <- "2017_Programı_ResmiGazeteNushası.pdf"
+df2017 <- applyOcr(p2017_id)
+
+programs <- rbind(programs, df2017)
+programs <- programs[order(programs$doc_id),]
+
+textmin <- Corpus(DataframeSource(programs))
 textmin <- tm_map(textmin, removePunctuation, ucp = TRUE)
 textmin <- tm_map(textmin, removeWords, stopwords::stopwords("tr", source = "stopwords-iso"))
 
