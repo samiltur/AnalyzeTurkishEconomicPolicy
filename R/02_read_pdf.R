@@ -1,6 +1,5 @@
 here::i_am("R/02_read_pdf.R")
 
-library(conflicted)
 library(here)
 library(pdftools)
 library(data.table)
@@ -31,7 +30,7 @@ programs <- read_dir(
   trim = TRUE,
   combine = TRUE,
   format = FALSE,
-  ocr = TRUE
+  ocr = FALSE
 )
 colnames(programs) <- c("doc_id", "text")
 
@@ -53,11 +52,13 @@ applyOcr <- function(program_id)
   return(df)
 }
 # TODO: Should sense and automatically apply ocr
-p2017_id <- "2017_Programı_ResmiGazeteNushası.pdf"
-df2017 <- applyOcr(p2017_id)
+df2017 <- applyOcr("2017_Programı_ResmiGazeteNushası.pdf")
 
 programs <- rbind(programs, df2017)
+programs[programs==""] <- NA
+programs <- na.omit(programs)
 programs <- programs[order(programs$doc_id),]
+rownames(programs) <- 1:nrow(programs)
 
 textmin <- Corpus(DataframeSource(programs))
 textmin <- tm_map(textmin, removePunctuation, ucp = TRUE)
@@ -98,3 +99,4 @@ sums["enerji"]
 
 # all words starting with öğr Adjust regex to find what you need.
 sums[grep("^öğr", names(sums))]
+a <- programs$text[[22]]
