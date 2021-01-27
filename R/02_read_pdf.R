@@ -1,5 +1,6 @@
 here::i_am("R/02_read_pdf.R")
 
+library(conflicted)
 library(here)
 library(pdftools)
 library(data.table)
@@ -9,16 +10,32 @@ library(textreadr)
 library(magrittr)
 library(stopwords)
 
+stopwords::stopwords_getlanguages(source = "stopwords-iso")
+
 Sys.setlocale(category = "LC_ALL", locale = "Turkish")
 
-#directory <- "annual_programs"
-files2 <- list.files(path = here(), recursive = T, include.dirs = T, pattern = "pdf$")
+directory <- "annual_programs"
 
-textmin <- Corpus(URISource(files2),
-                  readerControl = list(reader = readPDF,
-                                       language = "tr"))
+programs <- read_dir(
+  path = here(directory),
+  pattern = NULL,
+  doc.col = "doc_id",
+  all.files = FALSE,
+  recursive = FALSE,
+  ignore.case = FALSE,
+  verbose = TRUE,
+  skip = 0,
+  remove.empty = TRUE,
+  trim = TRUE,
+  combine = TRUE,
+  format = FALSE,
+  ocr = TRUE
+)
+colnames(programs) <- c("doc_id", "text")
+textmin <- Corpus(DataframeSource(programs))
 
 textmin <- tm_map(textmin, removePunctuation, ucp = TRUE)
+textmin <- tm_map(textmin, removeWords, stopwords::stopwords("tr", source = "stopwords-iso"))
 
 opinions.tdm <- TermDocumentMatrix(textmin,
                                    control =
