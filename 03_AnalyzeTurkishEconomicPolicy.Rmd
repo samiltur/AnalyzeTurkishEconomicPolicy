@@ -17,11 +17,16 @@ source("R/02_read_pdf.R")
 ```{r search_keywords}
 
 search_terms <- c("yenilenebilir", "rüzgar", "rüzgâr", "güneş", "nükleer",
-                  "hidroelektrik", "jeotermal", "ngs", "hes", "petrol", "gaz", "kömür", "doğalgaz")
+                  "hidroelektrik", "jeotermal", "ngs", "hes", "petrol", "gaz", 
+                  "kömür", "doğalgaz", "linyit")
 
 freqs <- findFreq(search_terms)
 
 freqsDT <- as.data.table(freqs, keep.rownames = "Years")
+freqsDT$gaz <- freqsDT$gaz + freqsDT$doğalgaz
+freqsDT$hidroelektrik <- freqsDT$hidroelektrik + freqsDT$hes
+freqsDT$nükleer <- freqsDT$nükleer + freqsDT$ngs
+freqsDT$kömür <- freqsDT$kömür + freqsDT$linyit
 # sums[search_terms]
 
 # findFreq("enerji")
@@ -35,7 +40,7 @@ freqsDT <- as.data.table(freqs, keep.rownames = "Years")
 ```{r libraries}
 my_packages <- c("WDI", "data.table", "ggplot2", "plotly", "CBRT", "ggthemes", "scales")
 not_installed <- my_packages[!(my_packages %in% installed.packages()[ , "Package"])]
-if(length(not_installed)) install.packages(not_installed)
+if(length(not_installed)) install.packages(not_installed, repos = "http://cran.us.r-project.org")
 
 library(WDI)
 library(data.table)
@@ -150,25 +155,25 @@ clabs_f <-   labs(title = "Frequencies",
                  subtitle = "Turkey",
                  x = "Years", y = "Sources",
                  caption = "Source: Annual Plans")
-# gf <- ggplot(freqsDT, mapping = aes(x = Years)) +
-#   geom_point(size = 2, mapping = aes(y = petrol, color= "petrol"))+
-#   geom_point(size = 1, mapping = aes(y = kömür, color = "kömür")) +
-#   geom_point(size = 1, mapping = aes(y = gaz, color = "gaz")) +
-#   geom_smooth(aes(y = petrol) ) +
-#   my_theme() +
-#   guides(col = guide_legend("")) + clabs_f
+gf <- ggplot(freqsDT, mapping = aes(x = Years)) +
+  geom_point(size = 1, mapping = aes(y = petrol, color= "petrol"))+
+  geom_point(size = 1, mapping = aes(y = kömür, color = "kömür")) +
+  geom_point(size = 1, mapping = aes(y = gaz, color = "gaz")) +
+  geom_point(size = 1, mapping = aes(y = hidroelektrik, color = "hidroelektrik")) +
+  my_theme() +
+  guides(col = guide_legend("")) + clabs_f
 
 # gf <- ggplot(freqsDT, aes(x = Years, y = value, colour = variable)) + 
 #     geom_smooth() + geom_point() + 
 #     my_theme() +
 #   guides(col = guide_legend("")) + clabs_f
 
-gf <- ggplot(freqsDT, mapping = aes(x = Years)) +
-  geom_line(size = 1, mapping = aes(y = kömür), color = "black")+
-  geom_line(size = 1, mapping = aes(y = petrol), colour = "dark green") +
-  geom_line(size = 1, mapping = aes(y = gaz), colour = "blue")+
-  my_theme() +
-  guides(col = guide_legend("")) +clabs_f
+# gf <- ggplot(freqsDT, mapping = aes(x = Years)) +
+#   geom_line(size = 1, mapping = aes(y = kömür), color = "black")+
+#   geom_line(size = 1, mapping = aes(y = petrol), colour = "dark green") +
+#   geom_line(size = 1, mapping = aes(y = gaz), colour = "blue")+
+#   my_theme() +
+#   guides(col = guide_legend("")) +clabs_f
 
 ggplotly(gf)
 ```

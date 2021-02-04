@@ -1,6 +1,6 @@
 my_packages <- c("here", "rvest")
 not_installed <- my_packages[!(my_packages %in% installed.packages()[ , "Package"])]
-if(length(not_installed)) install.packages(not_installed)
+if(length(not_installed)) install.packages(not_installed, repos = "http://cran.us.r-project.org")
 
 here::i_am("R/01_download_pdf.R")
 
