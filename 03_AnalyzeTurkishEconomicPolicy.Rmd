@@ -10,14 +10,14 @@ knitr::opts_chunk$set(echo = F, warning = F, message = F, results = F)
 ```
 
 ```{r run_scripts}
-# source("R/01_download_pdf.R", encoding = "UTF-8")
+source("R/01_download_pdf.R", encoding = "UTF-8")
 source("R/02_read_pdf.R")
 ```
 
 ```{r search_keywords}
 
 search_terms <- c("yenilenebilir", "rüzgar", "rüzgâr", "güneş", "nükleer",
-                  "hidroelektrik", "jeotermal", "ngs", "hes", "petrol", "gaz", "kömür")
+                  "hidroelektrik", "jeotermal", "ngs", "hes", "petrol", "gaz", "kömür", "doğalgaz")
 
 freqs <- findFreq(search_terms)
 
@@ -33,51 +33,52 @@ freqsDT <- as.data.table(freqs, keep.rownames = "Years")
 ```
 
 ```{r libraries}
-my_packages <- c("WDI", "data.table", "ggplot2", "plotly", "CBRT")
+my_packages <- c("WDI", "data.table", "ggplot2", "plotly", "CBRT", "ggthemes", "scales")
 not_installed <- my_packages[!(my_packages %in% installed.packages()[ , "Package"])]
 if(length(not_installed)) install.packages(not_installed)
-
 
 library(WDI)
 library(data.table)
 library(ggplot2)
 library(plotly)
 library(CBRT)
+library(ggthemes)
+library(scales)
 ```
 
 ```{r theme}
 # 
-my_theme <- function(base_size = 11,base_family ="",cols =c("#EB5E57","#9D3BED"))
-{theme(rect= element_blank(),
-       text=element_text(size=11,family = "latha"),
-       plot.title= element_text(size =rel(1.4), color= "#FA6850",face = "bold"),
-       plot.subtitle = element_text(size =rel(1), color= "#FA6850", face= "bold"),
-       plot.caption = element_text(color = "#FA6850", hjust = 1,vjust = 1,size = rel(0.7)),
-       panel.background = element_rect(colour = "#E9C2F0"),
-       panel.grid.major.y = element_line( color = "#A462FA",linetype = "dotted", size =rel(0.3)),
-       panel.grid.major.x = element_blank(),
-       panel.grid.minor.y = element_blank(),
-       panel.grid.minor.x = element_blank(),
-       panel.border = element_blank(),
-       axis.title.x = element_text(colour= "#910EF5",size = rel(1)),
-       axis.title.y = element_text(colour= "#910EF5",size = rel(1)),
-       axis.line.x = element_line(colour = "#FA6850", size = rel(0.6)),
-       axis.line.y = element_line(colour = "#FA6850",size = rel(0.6)))}
+# my_theme <- function(base_size = 11,base_family ="",cols =c("#EB5E57","#9D3BED"))
+# {theme(rect= element_blank(),
+#        text=element_text(size=11,family = "latha"),
+#        plot.title= element_text(size =rel(1.4), color= "#FA6850",face = "bold"),
+#        plot.subtitle = element_text(size =rel(1), color= "#FA6850", face= "bold"),
+#        plot.caption = element_text(color = "#FA6850", hjust = 1,vjust = 1,size = rel(0.7)),
+#        panel.background = element_rect(colour = "#E9C2F0"),
+#        panel.grid.major.y = element_line( color = "#A462FA",linetype = "dotted", size =rel(0.3)),
+#        panel.grid.major.x = element_blank(),
+#        panel.grid.minor.y = element_blank(),
+#        panel.grid.minor.x = element_blank(),
+#        panel.border = element_blank(),
+#        axis.title.x = element_text(colour= "#910EF5",size = rel(1)),
+#        axis.title.y = element_text(colour= "#910EF5",size = rel(1)),
+#        axis.line.x = element_line(colour = "#FA6850", size = rel(0.6)),
+#        axis.line.y = element_line(colour = "#FA6850",size = rel(0.6)))}
 
 
-# my_theme <- function()  { theme_bw()   + 
-#     theme(panel.border = element_rect(color = "gray70", size = 1.5)) +
-#   theme(legend.position = "none") +
-#   theme(plot.caption = element_text(color = "blue4", size = rel(0.9))) +
-#   theme(panel.background = element_rect(fill = "mintcream", colour = "gray70"), panel.grid = element_line(colour ="gray70"), 
-#       panel.grid.minor = element_line(size = rel(0.5)), 
-#       strip.background = element_rect(fill = "mintcream", 
-#                               colour = "gray70"), complete = TRUE) +theme(axis.title.x= element_text(color = "blue4", size = rel(0.9)),
-#                             axis.title.y = element_text(color = "blue4", size = rel(0.9))) + 
-#     theme(plot.title = element_text(color = "blue4", size = rel(1))) + 
-#     theme(axis.text.x= element_text(color = "blue4",size = rel(0.85)),
-#           axis.text.y = element_text(color = "blue4",size = rel(0.85))) +
-#     theme(legend.text = element_text(size = rel(0.8), color = "blue4"))}
+my_theme <- function()  { theme_bw()   +
+    theme(panel.border = element_rect(color = "gray70", size = 1.5)) +
+  theme(legend.position = "none") +
+  theme(plot.caption = element_text(color = "blue4", size = rel(0.9))) +
+  theme(panel.background = element_rect(fill = "mintcream", colour = "gray70"), panel.grid = element_line(colour ="gray70"),
+      panel.grid.minor = element_line(size = rel(0.5)),
+      strip.background = element_rect(fill = "mintcream",
+                              colour = "gray70"), complete = TRUE) +theme(axis.title.x= element_text(color = "blue4", size = rel(0.9)),
+                            axis.title.y = element_text(color = "blue4", size = rel(0.9))) +
+    theme(plot.title = element_text(color = "blue4", size = rel(1))) +
+    theme(axis.text.x= element_text(color = "blue4",size = rel(0.85)),
+          axis.text.y = element_text(color = "blue4",size = rel(0.85))) +
+    theme(legend.text = element_text(size = rel(0.8), color = "blue4"))}
 ```
 
 ## Analysis {.tabset}
@@ -105,8 +106,12 @@ clabs <-   labs(title = "Oil Rents (% of GDP)",
                 caption = "Source: World Bank")
 
 g1 <- ggplot(df, aes(year, NY.GDP.PETR.RT.ZS)) + geom_line() +scale_y_log10()+ my_theme() + clabs
-ggplotly(g1)
 g2 <- ggplot(df, aes(year, NY.GDP.PETR.RT.ZS)) + geom_line() + my_theme() + clabs
+
+```
+
+```{r, results=T}
+ggplotly(g1)
 ggplotly(g2)
 ```
 
@@ -134,22 +139,38 @@ g3 <- ggplot(dfrents, mapping = aes(x = year)) + geom_line(size = 1, mapping = a
   geom_line(size = 1, mapping = aes(y = NY.GDP.NGAS.RT.ZS, color = "Natural Gas"))+
   geom_line(size = 1, mapping = aes(y = NY.GDP.TOTL.RT.ZS, color = "total natural resources")) +my_theme() +
   guides(col = guide_legend("")) +clabs7
+```
+
+```{r, results=T}
 ggplotly(g3)
 ```
 
-```{r freqs}
+```{r freqs, results=T}
 clabs_f <-   labs(title = "Frequencies",
                  subtitle = "Turkey",
                  x = "Years", y = "Sources",
                  caption = "Source: Annual Plans")
-ggplot(freqsDT, mapping = aes(x = Years)) + 
-  geom_line(size = 1, mapping = aes(y = petrol))+
-  # geom_line(size = 1, mapping = aes(y = "kömür", color = "Coal")) +
-  # geom_line(size = 1, mapping = aes(y = "gaz", color = "Natural Gas"))+
-  # geom_point() + 
-  # geom_smooth(method = "lm", formula = y ~ x, se = FALSE) + 
+# gf <- ggplot(freqsDT, mapping = aes(x = Years)) +
+#   geom_point(size = 2, mapping = aes(y = petrol, color= "petrol"))+
+#   geom_point(size = 1, mapping = aes(y = kömür, color = "kömür")) +
+#   geom_point(size = 1, mapping = aes(y = gaz, color = "gaz")) +
+#   geom_smooth(aes(y = petrol) ) +
+#   my_theme() +
+#   guides(col = guide_legend("")) + clabs_f
+
+# gf <- ggplot(freqsDT, aes(x = Years, y = value, colour = variable)) + 
+#     geom_smooth() + geom_point() + 
+#     my_theme() +
+#   guides(col = guide_legend("")) + clabs_f
+
+gf <- ggplot(freqsDT, mapping = aes(x = Years)) +
+  geom_line(size = 1, mapping = aes(y = kömür), color = "black")+
+  geom_line(size = 1, mapping = aes(y = petrol), colour = "dark green") +
+  geom_line(size = 1, mapping = aes(y = gaz), colour = "blue")+
   my_theme() +
-  guides(col = guide_legend("")) + clabs_f
+  guides(col = guide_legend("")) +clabs_f
+
+ggplotly(gf)
 ```
 
 ###  alternative and nuclear energy (% of total energy use)
@@ -173,8 +194,11 @@ clabs1 <-   labs(title = "Alternative and Nuclear Energy (% of total energy use)
 
 
 g4 <- ggplot(dtnuclear, aes(year, EG.USE.COMM.CL.ZS)) + geom_line() +scale_y_log10()+ my_theme() + clabs1
-ggplotly(g4)
 g5 <- ggplot(dtnuclear, aes(year, EG.USE.COMM.CL.ZS)) + geom_line() + my_theme() + clabs1
+```
+
+```{r, results=T}
+ggplotly(g4)
 ggplotly(g5)
 ```
 
@@ -199,10 +223,11 @@ clabsnuc <-   labs(title = "Alternative and Nuclear Energy (% of total energy us
 g6 <- ggplot(DTnuc2, mapping = aes(x = year)) + geom_bar(aes(y = EG.USE.COMM.CL.ZS.x, color= "Turkey"), stat ="identity",position =position_dodge())+
   geom_line(size = 1, mapping = aes(y = EG.USE.COMM.CL.ZS.y, color = "Middle East & North Africa")) + my_theme() +
   guides(col = guide_legend(""))+ clabsnuc
-ggplotly(g6)
-
 ```
 
+```{r, results=T}
+ggplotly(g6)
+```
 
 ### bir de middle income grupla karşılaştıralım
 ```{r compare_MI}
@@ -223,17 +248,25 @@ clabsnuc3 <-   labs(title = "Alternative and Nuclear Energy (% of total energy u
                    caption = "Source: World Bank")
 
 head(DTnuc3)
-g7 <- ggplot(DTnuc3, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = EG.USE.COMM.CL.ZS.x, color = "Turkey"))+
-  geom_line(size = 1, mapping = aes(y = EG.USE.COMM.CL.ZS.y, color = "Middle Income")) + my_theme() +
-  guides(col = guide_legend(""))+ clabsnuc3
-ggplotly(g7)
+g7 <- ggplot(DTnuc3, mapping = aes(x = year)) + 
+  geom_line(size = 1, mapping = aes(y = EG.USE.COMM.CL.ZS.x, color = "Turkey")) +
+  geom_line(size = 1, mapping = aes(y = EG.USE.COMM.CL.ZS.y, color = "Middle Income")) + 
+  my_theme() +
+  guides(col = guide_legend("")) + 
+  clabsnuc3
 
-g8 <- ggplot(DTnuc3, mapping = aes(x = year)) + geom_bar(aes(y = EG.USE.COMM.CL.ZS.x, color ="Turkey"), stat ="identity",position =position_dodge())+
-  geom_line(size = 1, mapping = aes(y = EG.USE.COMM.CL.ZS.y, color = "Middle Income")) + my_theme() +
-  guides(col = guide_legend(""))+ clabsnuc3
-ggplotly(g8)
+g8 <- ggplot(DTnuc3, mapping = aes(x = year)) + 
+  geom_bar(aes(y = EG.USE.COMM.CL.ZS.x, color ="Turkey"), stat ="identity",position =position_dodge()) +
+  geom_line(size = 1, mapping = aes(y = EG.USE.COMM.CL.ZS.y, color = "Middle Income")) + 
+  my_theme() +
+  guides(col = guide_legend(""))+ 
+  clabsnuc3
 ```
 
+```{r, results=T}
+ggplotly(g7)
+ggplotly(g8)
+```
 
 ###  energy imports,net(% of energy use)
 ```{r energy_imports}
@@ -265,14 +298,16 @@ head(DTimport)
 g9 <- ggplot(DTimport, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.x, color = "Turkey"))+
   geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.y, color = "OECD")) + my_theme() +
   guides(col = guide_legend(""))+ clabso
-ggplotly(g9)
 
 g10 <- ggplot(DTimport, mapping = aes(x = year)) + geom_bar(aes(y = EG.IMP.CONS.ZS.x, color= "Turkey"), stat ="identity",position =position_dodge())+
   geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.y, color = "OECD")) + my_theme() +
   guides(col = guide_legend(""))+ clabso
-ggplotly(g10)
 ```
 
+```{r, results=T}
+ggplotly(g9)
+ggplotly(g10)
+```
 ### middle income ile karşılaştıralım
 ```{r compare_mi2}
 
@@ -291,6 +326,10 @@ clabsx <-   labs(title = "Energy Imports,net(% of energy use)",
 g11 <- ggplot(DTimport2, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.x, color = "Turkey"))+
   geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.y, color = "Middle Income")) + my_theme() +
   guides(col = guide_legend(""))+ clabsx
+ggplotly(g11)
+```
+
+```{r, results=T}
 ggplotly(g11)
 ```
 
@@ -314,11 +353,14 @@ clabs3 <-   labs(title = "Energy Imports,net(% of energy use)",
 g12 <- ggplot(DTimport3, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.x, color = "Turkey"))+
   geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.y, color = "World")) + my_theme() +
   guides(col = guide_legend(""))+ clabs3
-ggplotly(g12)
 
 g13 <- ggplot(DTimport3, mapping = aes(x = year)) + geom_bar(aes(y = EG.IMP.CONS.ZS.x, color="Turkey"), stat ="identity",position =position_dodge())+
   geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.y, color = "World")) + my_theme() +
   guides(col = guide_legend(""))+ clabs3
+```
+
+```{r, results=T}
+ggplotly(g12)
 ggplotly(g13)
 ```
 
@@ -340,11 +382,15 @@ clabsel <-   labs(title = "Electricity production from sources(% of total)",
                  x = "Years", y = "Sources",
                  caption = "Source: World Bank")
 
-ggplot(dtproduction, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = EG.ELC.PETR.ZS, color = "Oil"))+
+g14 <- ggplot(dtproduction, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = EG.ELC.PETR.ZS, color = "Oil"))+
   geom_line(size = 1, mapping = aes(y = EG.ELC.NGAS.ZS, color = "natural gas")) +
   geom_line(size = 1, mapping = aes(y = EG.ELC.COAL.ZS, color = "Coal"))+
   geom_line(size = 1, mapping = aes(y = EG.ELC.HYRO.ZS, color = "hydroelectric")) +my_theme() +
   guides(col = guide_legend("")) +clabsel
+```
+
+```{r, results=T}
+ggplotly(g14)
 ```
 
 ### fossil fuel energy consumption (% of total)
@@ -375,13 +421,18 @@ clabs4 <-   labs(title = "Fossil Fuel Energy Consumption (% of total)",
                  caption = "Source: World Bank")
 
 head(DTfossil)
-ggplot(DTfossil, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.x, color = "Turkey"))+
+g15 <- ggplot(DTfossil, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.x, color = "Turkey"))+
   geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.y, color = "Middle Income")) + my_theme() +
   guides(col = guide_legend(""))+ clabs4
 
-ggplot(DTfossil, mapping = aes(x = year)) + geom_bar(aes(y = EG.IMP.CONS.ZS.x, color ="Turkey"), stat ="identity",position =position_dodge())+
+g16 <- ggplot(DTfossil, mapping = aes(x = year)) + geom_bar(aes(y = EG.IMP.CONS.ZS.x, color ="Turkey"), stat ="identity",position =position_dodge())+
   geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.y, color = "OECD")) + my_theme() +
   guides(col = guide_legend(""))+ clabs4
+```
+
+```{r, results=T}
+ggplotly(g15)
+ggplotly(g16)
 ```
 
 ### bir de Europe & Central Asia ile karşılaştıralım
@@ -401,15 +452,23 @@ clabs5 <-   labs(title = "Fossil Fuel Energy Consumption (% of total)",
                  caption = "Source: World Bank")
 
 head(DTfossil2)
-ggplot(DTfossil2, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.x, color = "Turkey"))+
+g17 <- ggplot(DTfossil2, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.x, color = "Turkey"))+
   geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.y, color = "Europe & Central Asia")) + my_theme() +
   guides(col = guide_legend(""))+ clabs5
 ```
 
+```{r, results=T}
+ggplotly(g17)
+```
+
 ###  tek başına türkiye daha anlamlı
 ```{r turkey}
-ggplot(DTfossil2, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.x, color = "Turkey"))+
+g18 <- ggplot(DTfossil2, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.x, color = "Turkey"))+
   my_theme()+ clabs5
+```
+
+```{r, results=T}
+ggplotly(g18)
 ```
 
 ###  combustible renewable and waste (% of total)
@@ -433,7 +492,11 @@ clabs <-   labs(title = "Combustible Renewable and Waste (% of total)",
                 x = "Years", y = "",
                 caption = "Source: World Bank")
 
-ggplot(dtwaste, aes(year, EG.USE.CRNW.ZS)) + geom_line() + my_theme() + clabs
+g19 <- ggplot(dtwaste, aes(year, EG.USE.CRNW.ZS)) + geom_line() + my_theme() + clabs
+```
+
+```{r, results=T}
+ggplotly(g19)
 ```
 
 ### gdp growth ve yenilenebilir enerji tüketimi (%)
@@ -488,14 +551,19 @@ clabs8 <-   labs(title = "GDP Growth and Renewable Energy Consumption (% of TFEC
 
 
 
-ggplot(DT8, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = renew, color = "renewable energy consumption"))+
+g20 <- ggplot(DT8, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = renew, color = "renewable energy consumption"))+
   geom_line(size = 1, mapping = aes(y = gdp, color = "GDP Growth")) + my_theme() + guides(col = guide_legend(""))+ clabs8
 
 
-ggplot(DT8, mapping = aes(x = year)) + geom_bar(aes(y = renew, color ="Renewable Energy Cons.(%)"), stat ="identity",position =position_dodge())+
+g21 <-ggplot(DT8, mapping = aes(x = year)) + geom_bar(aes(y = renew, color ="Renewable Energy Cons.(%)"), stat ="identity",position =position_dodge())+
   geom_line(size = 1, mapping = aes(y = gdp, color = "GDP Growth(%)")) + my_theme() +
   guides(col = guide_legend(""))+ clabs8
 
+```
+
+```{r, results=T}
+ggplotly(g20)
+ggplotly(g21)
 ```
 
 ###  D-Elektrik, gaz, buhar ve iklimlendirme üretimi ve dağıtımı-Düzey Sanayi Üretim Endeksi (2015=100)(TÜİK)
@@ -511,7 +579,11 @@ clabs <-   labs(title = "Electricity, gas, steam and air conditioning supply",
                 x = "Years", y = "",
                 caption = "Source: CBRT")
 
-ggplot(endex, aes(year, index)) + geom_line() + my_theme() + clabs
+g22 <- ggplot(endex, aes(year, index)) + geom_line() + my_theme() + clabs
+```
+
+```{r, results=T}
+ggplotly(g22)
 ```
 
 ###  Fiyat Endeksi-Özel Kapsamlı TÜFE Göstergeleri (2003=100)(TÜİK)
@@ -528,8 +600,12 @@ clabse <-   labs(title = "Consumer Price Index-Indicators for the CPI's Having S
                 x = "Years", y = "Energy",
                 caption = "Source: CBRT")
 
-ggplot(energy, aes(year, energy)) + geom_line() + my_theme() + clabse
+g23 <- ggplot(energy, aes(year, energy)) + geom_line() + my_theme() + clabse
 
+```
+
+```{r, results=T}
+ggplotly(g23)
 ```
 
 ###  gdp growth ile eneergy indexi olmadı bir arada aşağıda görülüyor
@@ -549,12 +625,15 @@ clabs <-   labs(title = "GDP Growth and Energy Index",
                 subtitle = "Turkey",
                 x = "Years", y = "GDP Growth Rate and Energy Index",
                 caption = "Source: CBRT")
-ggplot(DTenergy, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = energy, color = "Energy Index"))+
+g24 <- ggplot(DTenergy, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = energy, color = "Energy Index"))+
   geom_line(size = 1, mapping = aes(y = GDP_Growth, color = "GDP Growth")) + my_theme() + guides(col = guide_legend(""))+ 
   clabs 
 
 ```
 
+```{r, results=T}
+ggplotly(g24)
+```
 
 ###  enerji ithalat ihracat ,çeyreklik
 Enerji (27. Fasıl) İhracat (Milyon ABD doları)
@@ -575,11 +654,15 @@ clabsimex <-   labs(title = "Energy Import and Export",
                 subtitle = "Turkey",
                 x = "Years", y = "",
                 caption = "Source: CBRT")
-ggplot(DTimex, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = import, color = "Energy Import"))+
+g25 <- ggplot(DTimex, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = import, color = "Energy Import"))+
   geom_line(size = 1, mapping = aes(y = export, color = "Energy Export")) + my_theme() + guides(col = guide_legend(""))+ 
   clabsimex + scale_y_log10()
 
 
+```
+
+```{r, results=T}
+ggplotly(g25)
 ```
 
 ###  yearly data ile de yaptım bu daha iyi oldu
@@ -601,7 +684,78 @@ clabsimex1 <-   labs(title = "Energy Import and Export",
                     x = "Years", y = "Import",
                     caption = "Source: CBRT")
 
-ggplot(DTimex1, mapping = aes(x = year)) + geom_bar(aes(y = import, color = " Import"), stat ="identity",position =position_dodge())+
+g26 <- ggplot(DTimex1, mapping = aes(x = year)) + geom_bar(aes(y = import, color = " Import"), stat ="identity",position =position_dodge())+
   geom_line(size = 1, mapping = aes(y = export, color = "Export")) +my_theme() +clabsimex1
 
 ```
+
+```{r, results=T}
+ggplotly(g26)
+```
+
+###  graphs
+```{r final_graphs}
+aa <-WDIsearch("current account")
+bb <-WDIsearch("manufacturing")
+cc <-WDIsearch("energy")
+
+cadTR <- WDI(country = "TR", indicator = "BN.CAB.XOKA.CD", start = 1996, end = 2020 )
+#Current account balance (BoP)
+
+manufTR <-WDI(country = "TR", indicator = "NV.IND.MANF.CN", start = 1996, end = 2020 )
+#Manufacturing, value added (current LCU)
+
+energconsTR <- WDI(country = "TR", indicator = "1.1_TOTAL.FINAL.ENERGY.CONSUM", start = 1996, end = 2020 )
+#Total final energy consumption (TFEC)
+
+old1 <- c("iso2c", "country", "BN.CAB.XOKA.CD", "year")
+old2 <- c("iso2c", "country", "NV.IND.MANF.CN", "year")
+old3 <- c("iso2c", "country", "1.1_TOTAL.FINAL.ENERGY.CONSUM", "year")
+
+setnames(cadTR,old1, c("isocode", "country", "cab", "year"))
+setnames(manufTR, old2, c("isocode", "country", "manuf", "year"))
+setnames(energconsTR, old3, c("isocode", "country", "energy", "year"))
+
+energconsTR$energy <- round(energconsTR$energy, digits = 3)
+cadTR$cab <- cadTR$cab/100000
+
+dt1 <- merge(cadTR, energconsTR, by.x = "year", by.y = "year")
+
+dt2 <- merge(manufTR, energconsTR, by.x = "year", by.y = "year")
+
+#Visualization--------- 
+
+mytheme <- function()  { theme_bw()   + 
+      theme(panel.border = element_rect(color = "gray70", size = 1.5)) +
+      theme(legend.position = "none") +
+      theme(plot.caption = element_text(color = "blue4", size = rel(1))) +
+      theme(panel.background = element_rect(fill = "mintcream", colour = "gray70"), panel.grid = element_line(colour ="gray70"), 
+            panel.grid.minor = element_line(size = rel(0.5)), 
+            strip.background = element_rect(fill = "mintcream", 
+                                            colour = "gray70"), complete = TRUE) +theme(axis.title.x= element_text(color = "blue4", size = rel(1.1)),
+                                                                                        axis.title.y = element_text(color = "blue4", size = rel(1.1))) + 
+      theme(plot.title = element_text(color = "blue4", size = rel(1.5))) + 
+      theme(axis.text.x= element_text(color = "blue4",size = rel(0.9)),
+            axis.text.y = element_text(color = "blue4",size = rel(0.9))) +
+      theme(legend.text = element_text(size = rel(0.8), color = "blue4"))}
+
+labss1 <- labs(title = "Relationship Between Current Account Balance and Energy Consumption",
+              x = "Energy Consumption", y = "Current Account Balance (in million)",
+              caption = "Source: WorldBank")
+
+labss2 <- labs(title = "Relationship Between Manufacturing and Energy Consumption",
+               x = "Energy Consumption", y = "Manufacturing",
+               caption = "Source: WorldBank")
+
+bardiag <- ggplot(data = dt1, aes(x=energy, y = cab , color= year )) +geom_point()  +labss1 +mytheme() +
+  geom_smooth(method = "lm", se=F, color="purple") +scale_y_continuous(labels = comma)
+
+bardiagg <- ggplot(data = dt2, aes(x=energy, y = manuf , color= year )) +geom_point()  +labss2 +mytheme() +
+  geom_smooth(method = "lm", se=F, color="purple") +scale_y_continuous(labels = comma)
+```
+
+```{r results=TRUE}
+ggplotly(bardiag)
+ggplotly(bardiagg)
+```
+
