@@ -1,0 +1,607 @@
+---
+title: "grafikler toplu"
+author: "İrem Kaya"
+date: "02 02 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F, warning = F, message = F, results = F)
+```
+
+```{r run_scripts}
+# source("R/01_download_pdf.R", encoding = "UTF-8")
+source("R/02_read_pdf.R")
+```
+
+```{r search_keywords}
+
+search_terms <- c("yenilenebilir", "rüzgar", "rüzgâr", "güneş", "nükleer",
+                  "hidroelektrik", "jeotermal", "ngs", "hes", "petrol", "gaz", "kömür")
+
+freqs <- findFreq(search_terms)
+
+freqsDT <- as.data.table(freqs, keep.rownames = "Years")
+# sums[search_terms]
+
+# findFreq("enerji")
+# sums["enerji"]
+
+# # all words starting with verim Adjust regex to find what you need.
+# freq[,grep("^verim", colnames(freq))]
+# sums[grep("^verim", names(sums))]
+```
+
+```{r libraries}
+my_packages <- c("WDI", "data.table", "ggplot2", "plotly", "CBRT")
+not_installed <- my_packages[!(my_packages %in% installed.packages()[ , "Package"])]
+if(length(not_installed)) install.packages(not_installed)
+
+
+library(WDI)
+library(data.table)
+library(ggplot2)
+library(plotly)
+library(CBRT)
+```
+
+```{r theme}
+# 
+my_theme <- function(base_size = 11,base_family ="",cols =c("#EB5E57","#9D3BED"))
+{theme(rect= element_blank(),
+       text=element_text(size=11,family = "latha"),
+       plot.title= element_text(size =rel(1.4), color= "#FA6850",face = "bold"),
+       plot.subtitle = element_text(size =rel(1), color= "#FA6850", face= "bold"),
+       plot.caption = element_text(color = "#FA6850", hjust = 1,vjust = 1,size = rel(0.7)),
+       panel.background = element_rect(colour = "#E9C2F0"),
+       panel.grid.major.y = element_line( color = "#A462FA",linetype = "dotted", size =rel(0.3)),
+       panel.grid.major.x = element_blank(),
+       panel.grid.minor.y = element_blank(),
+       panel.grid.minor.x = element_blank(),
+       panel.border = element_blank(),
+       axis.title.x = element_text(colour= "#910EF5",size = rel(1)),
+       axis.title.y = element_text(colour= "#910EF5",size = rel(1)),
+       axis.line.x = element_line(colour = "#FA6850", size = rel(0.6)),
+       axis.line.y = element_line(colour = "#FA6850",size = rel(0.6)))}
+
+
+# my_theme <- function()  { theme_bw()   + 
+#     theme(panel.border = element_rect(color = "gray70", size = 1.5)) +
+#   theme(legend.position = "none") +
+#   theme(plot.caption = element_text(color = "blue4", size = rel(0.9))) +
+#   theme(panel.background = element_rect(fill = "mintcream", colour = "gray70"), panel.grid = element_line(colour ="gray70"), 
+#       panel.grid.minor = element_line(size = rel(0.5)), 
+#       strip.background = element_rect(fill = "mintcream", 
+#                               colour = "gray70"), complete = TRUE) +theme(axis.title.x= element_text(color = "blue4", size = rel(0.9)),
+#                             axis.title.y = element_text(color = "blue4", size = rel(0.9))) + 
+#     theme(plot.title = element_text(color = "blue4", size = rel(1))) + 
+#     theme(axis.text.x= element_text(color = "blue4",size = rel(0.85)),
+#           axis.text.y = element_text(color = "blue4",size = rel(0.85))) +
+#     theme(legend.text = element_text(size = rel(0.8), color = "blue4"))}
+```
+
+## Analysis {.tabset}
+
+### name : oil rents (% of GDP)
+oil rents (Oil rents are the difference between the value of crude oil production at world prices and total costs of production.)
+```{r oil_rents}
+WDIsearch(string = "Oil rents",
+          field = "name",
+          short = FALSE)
+
+df <- data.table(
+  WDI(country = c("TR"),
+      indicator="NY.GDP.PETR.RT.ZS",
+      start = 1996,
+      end= 2020,
+      extra = FALSE)
+)
+head(df)
+tail(df)
+
+clabs <-   labs(title = "Oil Rents (% of GDP)",
+                subtitle = "Turkey",
+                x = "Years", y = "Oil Rents",
+                caption = "Source: World Bank")
+
+g1 <- ggplot(df, aes(year, NY.GDP.PETR.RT.ZS)) + geom_line() +scale_y_log10()+ my_theme() + clabs
+ggplotly(g1)
+g2 <- ggplot(df, aes(year, NY.GDP.PETR.RT.ZS)) + geom_line() + my_theme() + clabs
+ggplotly(g2)
+```
+
+### rents
+(oil, natural gas, total natural resource) tüm rentleri bir araya topladım
+```{r rents}
+WDIsearch(string = "rents",
+          field = "name",
+          short = FALSE)
+
+dfrents <- data.table(
+  WDI(country = c("TR"),
+      indicator=c("NY.GDP.PETR.RT.ZS","NY.GDP.COAL.RT.ZS","NY.GDP.NGAS.RT.ZS","NY.GDP.TOTL.RT.ZS"),
+      start = 1996,
+      end= 2020,
+      extra = FALSE)
+)
+
+clabs7 <-   labs(title = "Rents(% of GDP)",
+                 subtitle = "Turkey",
+                 x = "Years", y = "Sources",
+                 caption = "Source: World Bank")
+g3 <- ggplot(dfrents, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = NY.GDP.PETR.RT.ZS, color = "Oil"))+
+  geom_line(size = 1, mapping = aes(y = NY.GDP.COAL.RT.ZS, color = "Coal")) +
+  geom_line(size = 1, mapping = aes(y = NY.GDP.NGAS.RT.ZS, color = "Natural Gas"))+
+  geom_line(size = 1, mapping = aes(y = NY.GDP.TOTL.RT.ZS, color = "total natural resources")) +my_theme() +
+  guides(col = guide_legend("")) +clabs7
+ggplotly(g3)
+```
+
+```{r freqs}
+clabs_f <-   labs(title = "Frequencies",
+                 subtitle = "Turkey",
+                 x = "Years", y = "Sources",
+                 caption = "Source: Annual Plans")
+ggplot(freqsDT, mapping = aes(x = Years)) + 
+  geom_line(size = 1, mapping = aes(y = petrol))+
+  # geom_line(size = 1, mapping = aes(y = "kömür", color = "Coal")) +
+  # geom_line(size = 1, mapping = aes(y = "gaz", color = "Natural Gas"))+
+  # geom_point() + 
+  # geom_smooth(method = "lm", formula = y ~ x, se = FALSE) + 
+  my_theme() +
+  guides(col = guide_legend("")) + clabs_f
+```
+
+###  alternative and nuclear energy (% of total energy use)
+```{r alternative_nuclear}
+WDIsearch(string = "Alternative and nuclear energy",
+          field = "name",
+          short = FALSE)
+
+dtnuclear <- data.table(
+  WDI(country = c("TR"),
+      indicator="EG.USE.COMM.CL.ZS",
+      start = 1996,
+      end= 2020,
+      extra = FALSE)
+)
+ head(dtnuclear)
+clabs1 <-   labs(title = "Alternative and Nuclear Energy (% of total energy use)",
+                subtitle = "Turkey",
+                x = "Years", y = "Alt. and Nuc. Energy",
+                caption = "Source: World Bank")
+
+
+g4 <- ggplot(dtnuclear, aes(year, EG.USE.COMM.CL.ZS)) + geom_line() +scale_y_log10()+ my_theme() + clabs1
+ggplotly(g4)
+g5 <- ggplot(dtnuclear, aes(year, EG.USE.COMM.CL.ZS)) + geom_line() + my_theme() + clabs1
+ggplotly(g5)
+```
+
+### bu noktada karşılaştırma yapalım (middle esat and north africa)
+```{r compare_ME_NA}
+dtnuclear2 <- data.table(
+  WDI(country = c("MEA"),
+      indicator="EG.USE.COMM.CL.ZS",
+      start = 1996,
+      end= 2020,
+      extra = FALSE)
+)
+
+DTnuc2 <- merge(dtnuclear, dtnuclear2, by = "year", all.x = TRUE, all.y = T)
+head(DTnuc2)
+
+clabsnuc <-   labs(title = "Alternative and Nuclear Energy (% of total energy use)",
+                 subtitle = "Turkey and Middle East and North Africa",
+                 x = "Years", y = "Alt. and Nuc. Energy(%)",
+                 caption = "Source: World Bank")
+
+g6 <- ggplot(DTnuc2, mapping = aes(x = year)) + geom_bar(aes(y = EG.USE.COMM.CL.ZS.x, color= "Turkey"), stat ="identity",position =position_dodge())+
+  geom_line(size = 1, mapping = aes(y = EG.USE.COMM.CL.ZS.y, color = "Middle East & North Africa")) + my_theme() +
+  guides(col = guide_legend(""))+ clabsnuc
+ggplotly(g6)
+
+```
+
+
+### bir de middle income grupla karşılaştıralım
+```{r compare_MI}
+dtnuclear3 <- data.table(
+  WDI(country = c("MIC"),
+      indicator="EG.USE.COMM.CL.ZS",
+      start = 1996,
+      end= 2020,
+      extra = FALSE)
+)
+
+DTnuc3 <- merge(dtnuclear, dtnuclear3, by = "year", all.x = TRUE, all.y = T)
+head(DTnuc3)
+
+clabsnuc3 <-   labs(title = "Alternative and Nuclear Energy (% of total energy use)",
+                   subtitle = "Turkey and Middle Income",
+                   x = "Years", y = "Alt. and Nuc. Energy",
+                   caption = "Source: World Bank")
+
+head(DTnuc3)
+g7 <- ggplot(DTnuc3, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = EG.USE.COMM.CL.ZS.x, color = "Turkey"))+
+  geom_line(size = 1, mapping = aes(y = EG.USE.COMM.CL.ZS.y, color = "Middle Income")) + my_theme() +
+  guides(col = guide_legend(""))+ clabsnuc3
+ggplotly(g7)
+
+g8 <- ggplot(DTnuc3, mapping = aes(x = year)) + geom_bar(aes(y = EG.USE.COMM.CL.ZS.x, color ="Turkey"), stat ="identity",position =position_dodge())+
+  geom_line(size = 1, mapping = aes(y = EG.USE.COMM.CL.ZS.y, color = "Middle Income")) + my_theme() +
+  guides(col = guide_legend(""))+ clabsnuc3
+ggplotly(g8)
+```
+
+
+###  energy imports,net(% of energy use)
+```{r energy_imports}
+WDIsearch(string = "energy imports",
+          field = "name",
+          short = FALSE)
+
+dtimport <- data.table(
+  WDI(country = c("TR"),
+      indicator="EG.IMP.CONS.ZS",
+      start = 1996,
+      end= 2020,
+      extra = FALSE)
+)
+head(dtimport)
+clabso <-   labs(title = "Energy Imports,net(% of energy use)",
+                 subtitle = "Turkey and OECD",
+                 x = "Years", y = "Enegy Import",
+                 caption = "Source: World Bank")
+dtimportoecd <- data.table(
+  WDI(country = c("OED"),
+      indicator="EG.IMP.CONS.ZS",
+      start = 1996,
+      end= 2020,
+      extra = FALSE))
+DTimport <- merge(dtimport, dtimportoecd, by = "year", all.x = TRUE, all.y = T)
+head(DTimport)
+
+g9 <- ggplot(DTimport, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.x, color = "Turkey"))+
+  geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.y, color = "OECD")) + my_theme() +
+  guides(col = guide_legend(""))+ clabso
+ggplotly(g9)
+
+g10 <- ggplot(DTimport, mapping = aes(x = year)) + geom_bar(aes(y = EG.IMP.CONS.ZS.x, color= "Turkey"), stat ="identity",position =position_dodge())+
+  geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.y, color = "OECD")) + my_theme() +
+  guides(col = guide_legend(""))+ clabso
+ggplotly(g10)
+```
+
+### middle income ile karşılaştıralım
+```{r compare_mi2}
+
+dtimportmid <- data.table(
+  WDI(country = c("MIC"),
+      indicator="EG.IMP.CONS.ZS",
+      start = 1996,
+      end= 2020,
+      extra = FALSE))
+DTimport2 <- merge(dtimport, dtimportmid, by = "year", all.x = TRUE, all.y = T)
+head(DTimport2)
+clabsx <-   labs(title = "Energy Imports,net(% of energy use)",
+                 subtitle = "Turkey and Middle Income",
+                 x = "Years", y = "Enegy Import",
+                 caption = "Source: World Bank")
+g11 <- ggplot(DTimport2, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.x, color = "Turkey"))+
+  geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.y, color = "Middle Income")) + my_theme() +
+  guides(col = guide_legend(""))+ clabsx
+ggplotly(g11)
+```
+
+###  bir de dünya ile karşılaştıralım
+```{r compare__world}
+dtimportworld <- data.table(
+  WDI(country = c("WLD"),
+      indicator="EG.IMP.CONS.ZS",
+      start = 1996,
+      end= 2020,
+      extra = FALSE))
+DTimport3 <- merge(dtimport, dtimportworld, by = "year", all.x = TRUE, all.y = T)
+head(DTimport3)
+
+clabs3 <-   labs(title = "Energy Imports,net(% of energy use)",
+                 subtitle = "Turkey and World",
+                 x = "Years", y = "Enegy Import",
+                 caption = "Source: World Bank")
+
+
+g12 <- ggplot(DTimport3, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.x, color = "Turkey"))+
+  geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.y, color = "World")) + my_theme() +
+  guides(col = guide_legend(""))+ clabs3
+ggplotly(g12)
+
+g13 <- ggplot(DTimport3, mapping = aes(x = year)) + geom_bar(aes(y = EG.IMP.CONS.ZS.x, color="Turkey"), stat ="identity",position =position_dodge())+
+  geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.y, color = "World")) + my_theme() +
+  guides(col = guide_legend(""))+ clabs3
+ggplotly(g13)
+```
+
+### electricity production from... (% of total)
+```{r electricit_prod}
+WDIsearch(string = "electricity production from",
+          field = "name",
+          short = FALSE)
+
+dtproduction <- data.table(
+  WDI(country = c("TR"),
+      indicator=c("EG.ELC.PETR.ZS","EG.ELC.NGAS.ZS","EG.ELC.COAL.ZS","EG.ELC.HYRO.ZS"),
+      start = 1996,
+      end= 2020,
+      extra = FALSE)
+)
+clabsel <-   labs(title = "Electricity production from sources(% of total)",
+                 subtitle = "Turkey",
+                 x = "Years", y = "Sources",
+                 caption = "Source: World Bank")
+
+ggplot(dtproduction, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = EG.ELC.PETR.ZS, color = "Oil"))+
+  geom_line(size = 1, mapping = aes(y = EG.ELC.NGAS.ZS, color = "natural gas")) +
+  geom_line(size = 1, mapping = aes(y = EG.ELC.COAL.ZS, color = "Coal"))+
+  geom_line(size = 1, mapping = aes(y = EG.ELC.HYRO.ZS, color = "hydroelectric")) +my_theme() +
+  guides(col = guide_legend("")) +clabsel
+```
+
+### fossil fuel energy consumption (% of total)
+```{r fossil_fuel}
+WDIsearch(string = "electricity production from",
+          field = "name",
+          short = FALSE)
+
+dtfossil1 <- data.table(
+  WDI(country = c("TR"),
+      indicator="EG.IMP.CONS.ZS",
+      start = 1996,
+      end= 2020,
+      extra = FALSE))
+
+dtfossil2 <- data.table(
+  WDI(country = c("MIC"),
+      indicator="EG.IMP.CONS.ZS",
+      start = 1996,
+      end= 2020,
+      extra = FALSE))
+
+DTfossil <- merge(dtfossil1, dtfossil2, by = "year", all.x = TRUE, all.y = T)
+
+clabs4 <-   labs(title = "Fossil Fuel Energy Consumption (% of total)",
+                 subtitle = "Turkey and Middle Income Countries",
+                 x = "Years", y = "Condumption",
+                 caption = "Source: World Bank")
+
+head(DTfossil)
+ggplot(DTfossil, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.x, color = "Turkey"))+
+  geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.y, color = "Middle Income")) + my_theme() +
+  guides(col = guide_legend(""))+ clabs4
+
+ggplot(DTfossil, mapping = aes(x = year)) + geom_bar(aes(y = EG.IMP.CONS.ZS.x, color ="Turkey"), stat ="identity",position =position_dodge())+
+  geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.y, color = "OECD")) + my_theme() +
+  guides(col = guide_legend(""))+ clabs4
+```
+
+### bir de Europe & Central Asia ile karşılaştıralım
+```{r compare_europe_ca}
+dtfossil3 <- data.table(
+  WDI(country = c("ECS"),
+      indicator="EG.IMP.CONS.ZS",
+      start = 1996,
+      end= 2020,
+      extra = FALSE))
+
+DTfossil2 <- merge(dtfossil1, dtfossil3, by = "year", all.x = TRUE, all.y = T)
+
+clabs5 <-   labs(title = "Fossil Fuel Energy Consumption (% of total)",
+                 subtitle = "Turkey and Europe & Central Asia",
+                 x = "Years", y = "Consumption",
+                 caption = "Source: World Bank")
+
+head(DTfossil2)
+ggplot(DTfossil2, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.x, color = "Turkey"))+
+  geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.y, color = "Europe & Central Asia")) + my_theme() +
+  guides(col = guide_legend(""))+ clabs5
+```
+
+###  tek başına türkiye daha anlamlı
+```{r turkey}
+ggplot(DTfossil2, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.x, color = "Turkey"))+
+  my_theme()+ clabs5
+```
+
+###  combustible renewable and waste (% of total)
+```{r combustible_renewable_and_waste}
+WDIsearch(string = "Combustible renewable",
+          field = "name",
+          short = FALSE)
+
+dtwaste <- data.table(
+  WDI(country = c("TR"),
+      indicator="EG.USE.CRNW.ZS",
+      start = 1996,
+      end= 2020,
+      extra = FALSE)
+)
+head(dtwaste)
+
+
+clabs <-   labs(title = "Combustible Renewable and Waste (% of total)",
+                subtitle = "Turkey",
+                x = "Years", y = "",
+                caption = "Source: World Bank")
+
+ggplot(dtwaste, aes(year, EG.USE.CRNW.ZS)) + geom_line() + my_theme() + clabs
+```
+
+### gdp growth ve yenilenebilir enerji tüketimi (%)
+```{r renewable_energy_consumption}
+WDIsearch(string = "renewable energy",
+          field = "name",
+          short = FALSE)
+
+dfrenew <- data.table(
+  WDI(country = c("TR"),
+      indicator="2.1_SHARE.TOTAL.RE.IN.TFEC",
+      start = 1996,
+      end= 2020,
+      extra = FALSE)
+)
+head(dfrenew)
+
+```
+
+```{r gdp_growth}
+WDIsearch(string = "GDP growth",
+          field = "name",
+          short = FALSE)
+
+dtgdp <- data.table(
+  WDI(country = c("TR"),
+      indicator="NY.GDP.MKTP.KD.ZG",
+      start = 1996,
+      end= 2020,
+      extra = FALSE)
+)
+
+head(dfrenew)
+
+setnames(dfrenew, c("2.1_SHARE.TOTAL.RE.IN.TFEC"), c("renew"))
+
+head(dfrenew)
+
+head(dtgdp)
+setnames(dtgdp, c("NY.GDP.MKTP.KD.ZG"), c("gdp"))
+head(dtgdp)
+tail(dtgdp)
+```
+
+```{r GDP_Growth_and_Renewable_Energy_Consumption}
+DT8 <- merge(dfrenew,dtgdp , by = "year", all.x = TRUE, all.y = T)
+head(DT8)
+clabs8 <-   labs(title = "GDP Growth and Renewable Energy Consumption (% of TFEC)",
+                subtitle = "Turkey",
+                x = "Years", y = "(%)",
+                caption = "Source: World Bank")
+
+
+
+ggplot(DT8, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = renew, color = "renewable energy consumption"))+
+  geom_line(size = 1, mapping = aes(y = gdp, color = "GDP Growth")) + my_theme() + guides(col = guide_legend(""))+ clabs8
+
+
+ggplot(DT8, mapping = aes(x = year)) + geom_bar(aes(y = renew, color ="Renewable Energy Cons.(%)"), stat ="identity",position =position_dodge())+
+  geom_line(size = 1, mapping = aes(y = gdp, color = "GDP Growth(%)")) + my_theme() +
+  guides(col = guide_legend(""))+ clabs8
+
+```
+
+###  D-Elektrik, gaz, buhar ve iklimlendirme üretimi ve dağıtımı-Düzey Sanayi Üretim Endeksi (2015=100)(TÜİK)
+```{r Electricity_gas_steam_and_air_conditioning_supply}
+endex <- getDataSeries("TP.SANAYREV4.Y41", CBRTKey= "APA7ENywLk",freq =6, startDate = "01-01-2005", endDate = "01-10-2020",na.rm =T)
+
+class(endex)
+head(endex)
+setnames(endex, c("time", "TP.SANAYREV4.Y41"), c("year", "index"))
+
+clabs <-   labs(title = "Electricity, gas, steam and air conditioning supply",
+                subtitle = "Turkey",
+                x = "Years", y = "",
+                caption = "Source: CBRT")
+
+ggplot(endex, aes(year, index)) + geom_line() + my_theme() + clabs
+```
+
+###  Fiyat Endeksi-Özel Kapsamlı TÜFE Göstergeleri (2003=100)(TÜİK)
+enerji
+```{r Consumer_Price_Index}
+energy <-  getDataSeries("TP.FE.OKTG07", CBRTKey= "APA7ENywLk",freq =6, startDate = "01-01-2003", endDate = "01-12-2020",na.rm =T)
+
+class(energy)
+head(energy)
+setnames(energy, c("time", "TP.FE.OKTG07"), c("year", "energy"))
+
+clabse <-   labs(title = "Consumer Price Index-Indicators for the CPI's Having Specified Coverages (2003=100)",
+                subtitle = "Turkey",
+                x = "Years", y = "Energy",
+                caption = "Source: CBRT")
+
+ggplot(energy, aes(year, energy)) + geom_line() + my_theme() + clabse
+
+```
+
+###  gdp growth ile eneergy indexi olmadı bir arada aşağıda görülüyor
+```{r gdp_growth_energy_index}
+GDPT <- getDataSeries("TP.GSYIH26.HY.ZH", CBRTKey= "APA7ENywLk",freq =6, startDate = "01-01-1998", endDate = "01-07-2020",na.rm =T)
+class(GDPT)
+head(GDPT)
+setnames(GDPT, c("time", "TP.GSYIH26.HY.ZH"), c("year", "GDP"))
+head(GDPT)
+GDPT[, GDP_Growth := 100*(GDP - shift(GDP, n = 4L))/shift(GDP, n = 4L)]
+head(GDPT)
+
+DTenergy <- merge(energy, GDPT, by = "year", all.x = TRUE, all.y = T)
+head(DTenergy)
+
+clabs <-   labs(title = "GDP Growth and Energy Index",
+                subtitle = "Turkey",
+                x = "Years", y = "GDP Growth Rate and Energy Index",
+                caption = "Source: CBRT")
+ggplot(DTenergy, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = energy, color = "Energy Index"))+
+  geom_line(size = 1, mapping = aes(y = GDP_Growth, color = "GDP Growth")) + my_theme() + guides(col = guide_legend(""))+ 
+  clabs 
+
+```
+
+
+###  enerji ithalat ihracat ,çeyreklik
+Enerji (27. Fasıl) İhracat (Milyon ABD doları)
+Enerji (27. Fasıl) İhracat (Milyon ABD doları)-Düzey Cari İşlemler Hesabı, Parasal Olmayan Altın ve Enerji Dış Ticareti (Milyon ABD doları)
+```{r energy_import_export}
+ihracat <-  getDataSeries("TP.HARICCARIACIK.K5", CBRTKey= "APA7ENywLk",freq =6, startDate = "01-01-1996", endDate = "01-12-2020",na.rm =T)
+head(ihracat)
+setnames(ihracat, c("time", "TP.HARICCARIACIK.K5"), c("year", "export"))
+
+ithalat <- getDataSeries("TP.HARICCARIACIK.K6", CBRTKey= "APA7ENywLk",freq =6, startDate = "01-01-1996", endDate = "01-12-2020",na.rm =T)
+head(ithalat)
+setnames(ithalat, c("time", "TP.HARICCARIACIK.K6"), c("year", "import"))
+
+DTimex <- merge(ithalat, ihracat, by = "year", all.x = TRUE, all.y = T)
+head(DTimex)
+
+clabsimex <-   labs(title = "Energy Import and Export",
+                subtitle = "Turkey",
+                x = "Years", y = "",
+                caption = "Source: CBRT")
+ggplot(DTimex, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = import, color = "Energy Import"))+
+  geom_line(size = 1, mapping = aes(y = export, color = "Energy Export")) + my_theme() + guides(col = guide_legend(""))+ 
+  clabsimex + scale_y_log10()
+
+
+```
+
+###  yearly data ile de yaptım bu daha iyi oldu
+```{r energy_import_export_yearly}
+ihracat1 <-  getDataSeries("TP.HARICCARIACIK.K5", CBRTKey= "APA7ENywLk",freq =12, startDate = "01-01-1996", endDate = "01-12-2020",na.rm =T)
+head(ihracat1)
+setnames(ihracat1, c("time", "TP.HARICCARIACIK.K5"), c("year", "export"))
+
+ithalat1 <- getDataSeries("TP.HARICCARIACIK.K6", CBRTKey= "APA7ENywLk",freq =12, startDate = "01-01-1996", endDate = "01-12-2020",na.rm =T)
+head(ithalat1)
+setnames(ithalat1, c("time", "TP.HARICCARIACIK.K6"), c("year", "import"))
+
+DTimex1 <- merge(ithalat1, ihracat1, by = "year", all.x = TRUE, all.y = T)
+head(DTimex1)
+
+
+clabsimex1 <-   labs(title = "Energy Import and Export",
+                    subtitle = "Turkey",
+                    x = "Years", y = "Import",
+                    caption = "Source: CBRT")
+
+ggplot(DTimex1, mapping = aes(x = year)) + geom_bar(aes(y = import, color = " Import"), stat ="identity",position =position_dodge())+
+  geom_line(size = 1, mapping = aes(y = export, color = "Export")) +my_theme() +clabsimex1
+
+```

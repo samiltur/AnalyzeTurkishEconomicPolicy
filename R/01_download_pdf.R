@@ -17,7 +17,7 @@ if (!file.exists(directory)){
   dir.create(file.path(here(), directory))
 }
 
-links <- sapply(annual_programs_url, function(x) {x %>% read_html() %>% html_nodes("a") %>% html_attr("href")})
+links <- sapply(annual_programs_url, function(x) {x %>% html_session() %>% html_nodes("a") %>% html_attr("href")})
 select <- NULL
 for (i in 1:length(links)){
   select[i] <-(grepl("programı", tolower(links[i]), fixed = TRUE) || grepl("Programi", links[i], fixed = TRUE))
