@@ -1,5 +1,5 @@
 ---
-title: "Turkish Economic Policy Analysis"
+title: "Turkish Energy Policy Analysis"
 author: "Ahmet Şamil Tür, Didem Ateş, Güneş Uğuz, Irmak Bolat, İrem Kaya"
 subtitle: "Econ 413 Term Project"
 output: html_document
@@ -90,9 +90,9 @@ my_theme <- function()  { theme_bw()   +
 
 # Introduction 
 
-Energy policies are important for development of the country’s economy and production. With the growth of the economy and production, the requirement of the energy has increased in Turkey. As a reflection of the requirement, there has been an increase in energy production/consumption and a change in energy policies. The ratio of energy production to meet energy consumption in Turkey is low.  According to 2017 data, the rate of imports in primary energy resources is 76 percent, means that Turkey is foreign-dependent in terms of energy (2020). This dependence on foreign energy is reflected in the current account balance negatively. Energy resources (fossil fuel) are insufficient in terms of energy production in Turkey, so renewable energy sources should be considered to improve current account balance.
+Energy policies are important for development of the country’s economy and production. With the growth of the economy and production, the requirement of the energy has increased in Turkey. As a reflection of the requirement, there has been an increase in energy production/consumption and a change in energy policies. The ratio of energy production to meet energy consumption in Turkey is low. According to 2017 data, the rate of imports in primary energy resources is 76 percent, means that Turkey is foreign-dependent in terms of energy (2020). This dependence on foreign energy is reflected in the current account balance negatively. Energy resources (fossil fuel) are insufficient in terms of energy production in Turkey, so renewable energy sources should be considered to improve current account balance.
 
-Based on the situations I have mentioned, this project examines the relationship between energy production, consumption, and consumption between 1996 and 2020 with gross domestic product and current account balance. We expect a positive relationship between energy consumption and gross domestic product, and between the generation of renewable resources and gross domestic product. We expect a negative relationship between current account balance and energy consumption, as we are externally dependent on energy resources.
+Based on the situations that are mentioned, this project examines the relationship between energy production, consumption, and consumption between 1996 and 2020 with gross domestic product and current account balance. We expect a positive relationship between energy consumption and gross domestic product, and between the generation of renewable resources and gross domestic product. We expect a negative relationship between current account balance and energy consumption, as we are externally dependent on energy resources. We used World Bank Databese for the analysis.
 
 
 # Analysis {.tabset}
@@ -193,13 +193,82 @@ Apart from the oil source, which has an increasing slope, natural gas also strik
 
 3.	In 1998, significant steps were taken in natural gas connections to meet the increasing energy demand.
 
-Therefore, after 1999 we observe that natural gas has the most significant share in Turkey's electricity production.
+Therefore, after 1999 we observe that natural gas has the most significant share in Turkey's electricity production. By 2019, we see that the share of coal and hydroelectricity in electricity generation has increased considerably.(2020)
 
-When we continue with hydroelectric, which is the only renewable energy source used in an active form in Turkey, in the second graph hydroelectricity keeps its place in energy policies.However, we observe a sharp decline from 1996 to 2001 in the first graph. Then even if there are ups and downs in the following years, its share tends to decrease. The main reason behind this is related to being insufficient in investments. "Build-Operate-Transfer" and "Build-Operate" models were proposed to solve the problems arising in ensuring sustainability in energy investments. With those two models, it was aimed to find investors and encourage the private sector. However, this policy couldn’t reach the desired result. Even if hydroelectric power generation is the best source for Turkey, in recent years, the destruction of the forest ecosystem for establishing hydroelectric power plants has met with great public reaction.
+When we continue with hydroelectric, which is the only remarkable renewable energy source used in Turkey, in the second graph hydroelectricity keeps its place in energy policies.However, we observe a sharp decline from 1996 to 2001 in the first graph. Then even if there are ups and downs in the following years, its share tends to decrease. The main reason behind this is related to being insufficient in investments. "Build-Operate-Transfer" and "Build-Operate" models were proposed to solve the problems arising in ensuring sustainability in energy investments. With those two models, it was aimed to find investors and encourage the private sector. However, this policy couldn’t reach the desired result. Even if hydroelectric power generation is the best source for Turkey, in recent years, the destruction of the forest ecosystem for establishing hydroelectric power plants has met with great public reaction.
 
 Lastly, when we look at coal, we see very stable progress in both of the graphs. Even though there are ups and downs in the first graph, coal keeps its share around 30% between 1996 and 2015. There is a very similar case in the second graph; coal keeps its place in energy policies.
 
+## Relationship Between Energy Consumption and GDP & GDP Growth
 
+```{r}
+gdpgr <-WDI(country = "TR", indicator = "NY.GDP.MKTP.KD.ZG", start = 1996, end = 2015 )
+gdp <-WDI(country = "TR", indicator = "NY.GDP.MKTP.CD", start = 1996, end = 2015 )
+energuse<- WDI(country = "TR", indicator = "EG.USE.PCAP.KG.OE", start = 1996, end = 2015 )
+gdp$NY.GDP.MKTP.CD <- gdp$NY.GDP.MKTP.CD/1000000
+
+head(gdpgr)
+old1 <- c("iso2c", "country", "NY.GDP.MKTP.KD.ZG", "year")
+old2 <- c("iso2c", "country", "NY.GDP.MKTP.CD", "year")
+old3 <- c("iso2c", "country", "EG.USE.PCAP.KG.OE", "year")
+
+
+setnames(gdpgr, old1, c("isocode", "country", "gdpgr", "year"))
+setnames(gdp,old2, c("isocode", "country", "gdp", "year"))
+setnames(energuse, old3, c("isocode", "country", "energyusee", "year"))
+
+head(gdpgr)
+head(gdp)
+head(energuse)
+
+
+dataa <- merge(energuse, gdpgr, by.x = "year", by.y = "year")
+datab <- merge(energuse, gdp, by.x = "year", by.y ="year")
+
+class(dataa)
+head(dataa)
+head(datab)
+
+
+#Visualization--------- 
+
+labss1 <- labs(title = "Relationship Between Enegry Consumption and GDP",
+               x = "Energy Consumption (kg of oil equivalent per capita)", y = "GDP growth (annual %)",
+               caption = "Source: WorldBank")
+
+labss2 <- labs(title = "Relationship Between Enegry Consumption and GDP Growth",
+               x = "Energy Consumption (kg of oil equivalent per capita)", y = "GDP in million (current US$)",
+               caption = "Source: WorldBank")
+
+linediag1 <- ggplot(data = datab, aes(x = energyusee, y= gdp, color= year)) +geom_point() +my_theme() +labss2 + 
+  scale_y_continuous(labels = comma) +geom_smooth(method="lm", se=F, color="purple")
+
+
+
+
+linediag2 <- ggplot(data = dataa, aes(x = energyusee, y= gdpgr, color= year)) +geom_point() +my_theme() +labss2 + 
+  scale_y_continuous() +geom_smooth(method="lm", se=F, color="purple")
+
+
+
+
+dtgdpc <- data.table(
+  WDI(country = c("TR"),
+      indicator="EG.GDP.PUSE.KO.PP.KD",
+      start = 1996,
+      end= 2020,
+      extra = FALSE)
+)
+head(dtgdpc)
+
+linediag3 <- ggplot(dtgdpc, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = EG.GDP.PUSE.KO.PP.KD, color = "GDP per unit of energy use")) + my_theme()
+```
+
+```{r, results=T}
+ggplotly(linediag1)
+ggplotly(linediag2)
+ggplotly(linediag3)
+```
 
 ## Relationship Between Energy Consumption and Current Account Balance & Manufacturing
 ```{r final_graphs}
@@ -248,7 +317,7 @@ bardiagg <- ggplot(data = dt2, aes(x=energy, y = manuf , color= year )) +geom_po
   geom_smooth(method = "lm", se=F, color="purple") +scale_y_continuous(labels = comma)
 ```
 
-We know from other researches that, while the increase in electricity consumption causes economic growth, the increase in energy consumption based on imports used in electricity production affects the CAB and causes a current account deficit. Also, we know that energy use of industrial (manufacturing) sector has highest share in electric consumption of Turkey. (Oğulata,2002) Therefore, in this part we examine both the relationship between current account balance and energy consumption, and the relationship between manufacturing and energy consumption
+We know from other researches that, while the increase in electricity consumption causes economic growth, the increase in energy consumption based on imports used in electricity production affects the CAB and causes a current account deficit. Also, we know that energy use of industrial (manufacturing) sector has highest share in electric consumption of Turkey. (Oğulata,2002) Therefore, in this part we examine both the relationship between current account balance and energy consumption, and the relationship between manufacturing and energy consumption.
 
 ```{r results=TRUE, fig.width=7, fig.height=5, fig.align="right"}
 ggplotly(bardiagg)
@@ -262,10 +331,9 @@ ggplotly(bardiag)
 
 The graph shows that there is a negative relationship between current account balance (CAB) and energy consumption. This is an also an expected result, because the ratio of energy production to meet energy consumption in the Turkey is low. The rate of imports in primary energy resources is 76 percent, means that Turkey is foreign-dependent in terms of energy Therefore, our energy sector depends on imports, which deteriotes CAB of Turkey. (2020)
 
-To examine the energy supply of Turkey in detail, the resources to use or generate electricity are supplied from abroad. For example, natural gas is second place in primary energy supply, and we import 99% of the natural gas used in our country. (2020). To decrease the foreign-dependency, National Energy and Mining Policy and Renewable Energy Investments Encouragement Policy have been applied since 2019. (2020 Annual Plan) Also, Nuclear Power Plant has been considered and works have started as of 2008. It would be better to consider renewable energy policies for the healthy world.
+To examine the energy supply of Turkey in detail, the resources to use or generate electricity are supplied from abroad. For example, natural gas is second place in primary energy supply, and we import 99% of the natural gas used in our country. (2020) To decrease the foreign-dependency, National Energy and Mining Policy and Renewable Energy Investments Encouragement Policy have been applied since 2019. (2020 Annual Plan) Exploration studies for natural gas, which is an important step in reducing foreign dependency, continue. Also, Nuclear Power Plant has been considered and works have started as of 2008.It would be better to consider renewable energy policies for the healthy world.
 
 When these results are taken into account, it has been revealed that electricity should be produced by using national energy resources in order to ensure economic growth and to increase the amount of electricity consumption and prevent the current account deficit. (Gökten and Karatepe, 2016) Turkey is in a deficient situation in terms of resources, so to decrease the current account deficit and to ensure a stable economic growth renewable energy sources could be used such as wave, wind, solar and so on. Green energy and other energy generation facilities should be considered.  
-
 
 ## Relationship Between Renewable Energy and GDP per Capita
 
@@ -328,7 +396,11 @@ Oğulata, T. (2002). Sectoral energy consumption in Turkey. Renewable and Sustai
 
 Strateji ve Bütçe Başkanlığı. (2020). 1996-2020 Yıllık Programları. Retrieved from https://www.sbb.gov.tr/yillik-programlar/
 
-WorldBank.. Data of Turkey.
+UNION OF CHAMBERS OF TURKISH ENGINEERS AND ARCHITECTS (UCTAE) CHAMBER OF MECHANICAL ENGINEERS (CME) ENERGY COMMISSION. (2020). Turkey Energy Outlook. 
+
+WorldBank. Data of Turkey.
+
+
 
 
 
