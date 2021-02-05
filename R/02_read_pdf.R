@@ -134,7 +134,7 @@ if (file.exists("freq.csv"))
   
   # turn tdm into dense matrix and create frequency vector. 
   freq <- (as.matrix(opinions.tdm))
-  write.csv(t(freq), "freq.csv", quote = FALSE)
+  write.csv(freq, "freq.csv", quote = FALSE)
   freq <- t(freq)
 }
 
