@@ -7,18 +7,24 @@ output: html_document
 <style type="text/css">
 body {
   font-family: Calibri ;
-  fontsize: 14pt;
-  color: black;
+  font-size: 14pt;
+  color:black;
 }
 h1,h2,h3 {
   font-family: Calibri ;
+  font-size: 18pt;
   color: darkblue;
 }
 h4,h5,h6 {
   font-family: Calibri ;
+  font-size: 16pt;
   color: darkblue;
 }
-</style> 
+.tabset {
+font-family: Calibri ;
+}
+</style>
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = F, warning = F, message = F, results = F)
@@ -84,7 +90,10 @@ my_theme <- function()  { theme_bw()   +
 
 # Introduction 
 
-ASD
+Energy policies are important for development of the country’s economy and production. With the growth of the economy and production, the requirement of the energy has increased in Turkey. As a reflection of the requirement, there has been an increase in energy production/consumption and a change in energy policies. The ratio of energy production to meet energy consumption in Turkey is low.  According to 2017 data, the rate of imports in primary energy resources is 76 percent, means that Turkey is foreign-dependent in terms of energy (2020). This dependence on foreign energy is reflected in the current account balance negatively. Energy resources (fossil fuel) are insufficient in terms of energy production in Turkey, so renewable energy sources should be considered to improve current account balance.
+
+Based on the situations I have mentioned, this project examines the relationship between energy production, consumption, and consumption between 1996 and 2020 with gross domestic product and current account balance. We expect a positive relationship between energy consumption and gross domestic product, and between the generation of renewable resources and gross domestic product. We expect a negative relationship between current account balance and energy consumption, as we are externally dependent on energy resources.
+
 
 # Analysis {.tabset}
 
@@ -239,21 +248,24 @@ bardiagg <- ggplot(data = dt2, aes(x=energy, y = manuf , color= year )) +geom_po
   geom_smooth(method = "lm", se=F, color="purple") +scale_y_continuous(labels = comma)
 ```
 
-We know from other researches that, while the increase in electricity consumption causes economic growth, the increase in energy consumption based on imports used in electricity production affects the CAB and causes a current account deficit. Also, we know that energy use of industrial (manufacturing) sector has highest share in electric consumption of Turkey. (Oğulata,2020) Therefore, in this part we examine both the relationship between current account balance and energy consumption, and the relationship between manufacturing and energy consumption
+We know from other researches that, while the increase in electricity consumption causes economic growth, the increase in energy consumption based on imports used in electricity production affects the CAB and causes a current account deficit. Also, we know that energy use of industrial (manufacturing) sector has highest share in electric consumption of Turkey. (Oğulata,2002) Therefore, in this part we examine both the relationship between current account balance and energy consumption, and the relationship between manufacturing and energy consumption
 
 ```{r results=TRUE, fig.width=7, fig.height=5, fig.align="right"}
 ggplotly(bardiagg)
 ```
 
-The graph shows that there is a positive relationship between manufacturing and energy consumption. This is an expected result that is not so surprising. Because of the energy consumption of industry has a highest share, while the manufacturing activities increase, electric consumption also increases.
-
+The graph shows that there is a positive relationship between manufacturing and energy consumption. This is an expected result that is not so surprising. Because of the energy consumption of industry has a highest share, while the manufacturing activities increase, electric consumption also increases. 
 
 ```{r results=TRUE, fig.width=9, fig.height=6}
 ggplotly(bardiag)
 ```
 
-The graph shows that there is a negative relationship between current account balance (CAB) and energy consumption. This is an also an expected result, because Turkey’s energy production meets approximately %48 of the total primary energy demand. Therefore, our energy sector depends on imports, which deteriorates CAB of Turkey. 
-When these results are taken into account, it has been revealed that electricity should be produced by using national energy resources in order to ensure economic growth and to increase the amount of electricity consumption and prevent the current account deficit. Turkey is scarce natural resources, so to overcome the current account deficit and to ensure a stable economic growth renewable energy sources could be used such as wind, wave, solar and so on. Green energy facilities or other energy generation facilities should be considered.  (Gökten and Karatepe, 2016)
+The graph shows that there is a negative relationship between current account balance (CAB) and energy consumption. This is an also an expected result, because the ratio of energy production to meet energy consumption in the Turkey is low. The rate of imports in primary energy resources is 76 percent, means that Turkey is foreign-dependent in terms of energy Therefore, our energy sector depends on imports, which deteriotes CAB of Turkey. (2020)
+
+To examine the energy supply of Turkey in detail, the resources to use or generate electricity are supplied from abroad. For example, natural gas is second place in primary energy supply, and we import 99% of the natural gas used in our country. (2020). To decrease the foreign-dependency, National Energy and Mining Policy and Renewable Energy Investments Encouragement Policy have been applied since 2019. (2020 Annual Plan) Also, Nuclear Power Plant has been considered and works have started as of 2008. It would be better to consider renewable energy policies for the healthy world.
+
+When these results are taken into account, it has been revealed that electricity should be produced by using national energy resources in order to ensure economic growth and to increase the amount of electricity consumption and prevent the current account deficit. (Gökten and Karatepe, 2016) Turkey is in a deficient situation in terms of resources, so to decrease the current account deficit and to ensure a stable economic growth renewable energy sources could be used such as wave, wind, solar and so on. Green energy and other energy generation facilities should be considered.  
+
 
 ## Relationship Between Renewable Energy and GDP per Capita
 
@@ -289,21 +301,35 @@ ggplotly(bardiag)
 ```
 
 
-Renewable energy on the global scale has experienced significant developments especially in the last 15 years. 
+Significant developments have been seen in renewable energy on a global scale, especially in the last 15 years. Turkey wants to improve the high rate of economic growth of recent years which is dependent on foreign supplies around 70% of primary energy sources. In other words, addiction is a risk to economic independence from time to time. For this reason, new and alternative energy sources are needed to meet the increasing energy needs, (Coban and Yorgancila,2018).  Around the world, countries have started to encourage using renewable energy sources and to prevent using of fossil fuels by increasing the cost of using them. Hence, the share of renewable energy in total supply has been increased in the last years. The rate of increase was 56 percent for OECD member states and more than 86 percent for high-income European countries. (Saygılı,2018) Even though the rate of using renewable energy is far from the optimal level, Turkey has a higher rate than the OECD average. 
 
-Turkey wants to improve the high rate of economic growth of recent years which has been caught in sustainability is dependent on foreign supplies around 70% of primary energy sources. In other words, addiction is a threat to economic independence from time to time. For this reason, new and alternative energy sources are needed to meet the increasing energy needs. 
+As of 2020, Turkey's renewable energy installed capacity is 52.429 MW. While other countries generally use a diversified energy mix, Turkey mostly produces hydroelectric power. The highest share among the renewable energy sources belongs to hydraulic energy with 60.4%, which means 31.688 MW. This is followed by wind with 9.633 MW, sun with 7.750MW, and others with 3.358 MW. Given these data, the share of renewable energy in the total energy consumption of Turkey has amounted to 34.39%. Although the sharing of renewable energy sources has been increasing by every year, Turkey has struggled to invest enough in geographically abundant energy, such as solar and wind power, relative to Italy and Greece. Using of wind energy has been rising since 2009 but there is still a long way to go. Solar energy has only been around since 2014. These resources can generate electricity at a much lower cost than other sources, (Akarsu, Korucu,2019).
 
-As of 2020, Turkey's renewable energy installed capacity is 52.429 MW. The highest share among the renewable energy sources belongs to hydraulic energy with 60.4%, which means 31.688 MW. This is followed by wind with 9.633 MW, sun with 7.750MW, and others with 3.358 MW. Given these data, the share of renewable energy in the total energy consumption of Turkey has amounted to 34.39%. 
+Moreover, as we can see at graph, while GDP per capita is increasing, using of renewable energy is also increasing. However, this relation is not a causal relation because in developing countries, renewable energy may not be priority for them, when income increases; they may prefer to make investment related to health, education, and other important areas rather than energy sector. Moreover, even they prefer to make energy investment, for low-income countries, economic growth may be much more important compared to environmental sustainability, as fossil fuels are much more cost competitive compared to renewables, fossil fuels can be used to promote economic growth (Saygılı,2018).
 
-The sharing of renewable energy sources has been increasing by every year. As we can see at graph, while GDP per capita is increasing, using of renewable energy is also increasing. However, this relation is not a strong positive relation because in developing countries, renewable energy may not be priority for them, when income increases; they may prefer to make investment related to health, education and other important areas rather than energy sector. Moreover, even they prefer to make energy investment, for low income countries, economic growth may be much more important compared to environmental sustainability, as fossil fuels are much more cost competitive compared to renewables, fossil fuels can be used to promote economic growth.
 
 # Conclusion
 
-ASD
+Energy policy is one of the most fundamental public policies of countries because it affects countries in environmental, economic, and international relations. Therefore, in this study, we focused on the energy policies set in line with environmentally friendly energy produced, ensuring the security of energy supply, maintaining price stability, and examining their relations with economic parameters in Turkey. For this purpose, we have discussed energy policies under four main headings. In the first part, we have focused on sources of electricity production. By, doing this we have reached that Turkey has used mostly fossil sources and hydroelectricity to generate electricity. When we got a little deeper, we realized that natural gas is the primary energy production source because it is more environmentally friendly than other fossil resources. Its installation cost is low, and it can react to rapid changes in energy demand. In the second part, we have focused on the relationship between economic growth and energy use in Turkey. We conclude that there is a two-way relationship between energy use and economic growth. While the increase in economic growth triggers energy consumption, increasing energy consumption contributes to the economy's growth. Between 1996 and 2020, both energy consumption and GDP have increased parallelly over time in Turkey. In the third part, we have focused on the relationship between energy consumption and Current Account Balance & Manufacturing. By investigating these two relations, we aimed to support our claim in the second part and see how a country dependent on imported energy affects the current account balance. For this part, we conclude that while there is a positive relationship between manufacturing and energy consumption, our research shows a negative relationship between current account balance (CAB) and energy consumption. This leads us to the following point: Turkey is needed to give the current account deficit to continue to grow in production due to energy import. In the last part, we have focused on the renewable energy concept because we have thought that awareness of renewable energy has started to increase with the changing social structure. Even if not used much in Turkey, we are aware that the world's future depends on using renewable resources. In addition to this, there is a positive relationship between the economic development of a country and renewable energy production. For this part, we have concluded that we observed a positive relationship between those two variables. Turkey has increased the use of renewable energy sources in time. The main reason behind that, with the increase in economic development, the use of renewable energy increases. If we get everything together, with this research, we reach that Turkey’s energy policies between 1996 and 2020 are compatible with the country's economic movements.
 
 # References
+
+Çoban A, O. Y. (n.d.). Relationship between Renewable Energy Consumption and Sustainable Economic Growth: The Case of Turkey. .
+
+H, S. (n.d.). RENEWABLE ENERGY USE IN TURKEY . Retrieved from https://www.tcmb.gov.tr/wps/wcm/connect/blog/en/main+menu/analyses/renewable_energy_us_+in_turkey
+
 Karatepe, S. G. (2016). Electricity consumption and economic growth:A causality analysis for Turkey in the frame of import-based energy consumption and current account deficit. Energy Sources, Part B: Economics, Planning, and Policy, 385-389.
 
-Oğulata, T. (2020). Sectoral energy consumption in Turkey. Renewable and Sustainable Energy Reviews.
+Lise K., W. M. (2007). Energy consumption and GDP in Turkey: Is there a co‐integration relationship?. Energy Economics.
+
+Akarsu N.,Korucu G.(2019). What are the Main Determinants of Renewable Energy Consumption? A Panel Threshold Regression Approach. . Anadolu Üniversitesi Sosyal Bilimler Dergisi.
+
+Oğulata, T. (2002). Sectoral energy consumption in Turkey. Renewable and Sustainable Energy Reviews.
+
+Strateji ve Bütçe Başkanlığı. (2020). 1996-2020 Yıllık Programları. Retrieved from https://www.sbb.gov.tr/yillik-programlar/
+
+WorldBank.. Data of Turkey.
+
+
 
 
