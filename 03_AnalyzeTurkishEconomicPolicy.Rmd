@@ -7,6 +7,15 @@ output: html_document
 <style type="text/css">
 body {
   font-family: Calibri ;
+  fontsize: 14pt;
+  color: black;
+}
+h1,h2,h3 {
+  font-family: Calibri ;
+  color: darkblue;
+}
+h4,h5,h6 {
+  font-family: Calibri ;
   color: darkblue;
 }
 </style> 
