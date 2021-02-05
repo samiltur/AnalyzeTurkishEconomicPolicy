@@ -1,7 +1,7 @@
 ---
-title: "grafikler toplu"
-author: "İrem Kaya"
-date: "02 02 2021"
+title: "Turkish Economic Policy Analysis"
+author: "Didem Ateş, Irmak Bolat, İrem Kaya, Ahmet Şamil Tür, Güneş Uğuz"
+date: "05.02.2021"
 output: html_document
 ---
 
@@ -52,25 +52,6 @@ library(scales)
 ```
 
 ```{r theme}
-# 
-# my_theme <- function(base_size = 11,base_family ="",cols =c("#EB5E57","#9D3BED"))
-# {theme(rect= element_blank(),
-#        text=element_text(size=11,family = "latha"),
-#        plot.title= element_text(size =rel(1.4), color= "#FA6850",face = "bold"),
-#        plot.subtitle = element_text(size =rel(1), color= "#FA6850", face= "bold"),
-#        plot.caption = element_text(color = "#FA6850", hjust = 1,vjust = 1,size = rel(0.7)),
-#        panel.background = element_rect(colour = "#E9C2F0"),
-#        panel.grid.major.y = element_line( color = "#A462FA",linetype = "dotted", size =rel(0.3)),
-#        panel.grid.major.x = element_blank(),
-#        panel.grid.minor.y = element_blank(),
-#        panel.grid.minor.x = element_blank(),
-#        panel.border = element_blank(),
-#        axis.title.x = element_text(colour= "#910EF5",size = rel(1)),
-#        axis.title.y = element_text(colour= "#910EF5",size = rel(1)),
-#        axis.line.x = element_line(colour = "#FA6850", size = rel(0.6)),
-#        axis.line.y = element_line(colour = "#FA6850",size = rel(0.6)))}
-
-
 my_theme <- function()  { theme_bw()   +
     theme(panel.border = element_rect(color = "gray70", size = 1.5)) +
   theme(legend.position = "none") +
@@ -86,294 +67,28 @@ my_theme <- function()  { theme_bw()   +
     theme(legend.text = element_text(size = rel(0.8), color = "blue4"))}
 ```
 
-## Analysis {.tabset}
+# Analysis {.tabset}
 
-### name : oil rents (% of GDP)
-oil rents (Oil rents are the difference between the value of crude oil production at world prices and total costs of production.)
-```{r oil_rents}
-WDIsearch(string = "Oil rents",
-          field = "name",
-          short = FALSE)
-
-df <- data.table(
+## Sources of Electricity Production
+```{r warning = FALSE,include=FALSE, echo =FALSE}
+#data base
+dtproduction1 <- data.table(
   WDI(country = c("TR"),
-      indicator="NY.GDP.PETR.RT.ZS",
+      indicator=c("EG.ELC.FOSL.ZS","EG.ELC.HYRO.ZS","EG.ELC.NUCL.ZS","EG.ELC.RNWX.ZS"),
       start = 1996,
       end= 2020,
       extra = FALSE)
 )
-head(df)
-tail(df)
+clabsel <-   labs(title = "Electricity production from sources(% of total)",
+                  subtitle = "Turkey",
+                  x = "Years", y = "Sources",
+                  caption = "Source: World Bank")
 
-clabs <-   labs(title = "Oil Rents (% of GDP)",
-                subtitle = "Turkey",
-                x = "Years", y = "Oil Rents",
-                caption = "Source: World Bank")
-
-g1 <- ggplot(df, aes(year, NY.GDP.PETR.RT.ZS)) + geom_line() +scale_y_log10()+ my_theme() + clabs
-g2 <- ggplot(df, aes(year, NY.GDP.PETR.RT.ZS)) + geom_line() + my_theme() + clabs
-
-```
-
-```{r, results=T}
-ggplotly(g1)
-ggplotly(g2)
-```
-
-### rents
-(oil, natural gas, total natural resource) tüm rentleri bir araya topladım
-```{r rents}
-WDIsearch(string = "rents",
-          field = "name",
-          short = FALSE)
-
-dfrents <- data.table(
-  WDI(country = c("TR"),
-      indicator=c("NY.GDP.PETR.RT.ZS","NY.GDP.COAL.RT.ZS","NY.GDP.NGAS.RT.ZS","NY.GDP.TOTL.RT.ZS"),
-      start = 1996,
-      end= 2020,
-      extra = FALSE)
-)
-
-clabs7 <-   labs(title = "Rents(% of GDP)",
-                 subtitle = "Turkey",
-                 x = "Years", y = "Sources",
-                 caption = "Source: World Bank")
-g3 <- ggplot(dfrents, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = NY.GDP.PETR.RT.ZS, color = "Oil"))+
-  geom_line(size = 1, mapping = aes(y = NY.GDP.COAL.RT.ZS, color = "Coal")) +
-  geom_line(size = 1, mapping = aes(y = NY.GDP.NGAS.RT.ZS, color = "Natural Gas"))+
-  geom_line(size = 1, mapping = aes(y = NY.GDP.TOTL.RT.ZS, color = "total natural resources")) +my_theme() +
-  guides(col = guide_legend("")) +clabs7
-```
-
-```{r, results=T}
-ggplotly(g3)
-```
-
-```{r freqs, results=T}
-clabs_f <-   labs(title = "Frequencies",
-                 subtitle = "Turkey",
-                 x = "Years", y = "Sources",
-                 caption = "Source: Annual Plans")
-gf <- ggplot(freqsDT, mapping = aes(x = Years)) +
-  geom_point(size = 1, mapping = aes(y = petrol, color= "petrol"))+
-  geom_point(size = 1, mapping = aes(y = kömür, color = "kömür")) +
-  geom_point(size = 1, mapping = aes(y = gaz, color = "gaz")) +
-  geom_point(size = 1, mapping = aes(y = hidroelektrik, color = "hidroelektrik")) +
-  my_theme() +
-  guides(col = guide_legend("")) + clabs_f
-
-# gf <- ggplot(freqsDT, aes(x = Years, y = value, colour = variable)) + 
-#     geom_smooth() + geom_point() + 
-#     my_theme() +
-#   guides(col = guide_legend("")) + clabs_f
-
-# gf <- ggplot(freqsDT, mapping = aes(x = Years)) +
-#   geom_line(size = 1, mapping = aes(y = kömür), color = "black")+
-#   geom_line(size = 1, mapping = aes(y = petrol), colour = "dark green") +
-#   geom_line(size = 1, mapping = aes(y = gaz), colour = "blue")+
-#   my_theme() +
-#   guides(col = guide_legend("")) +clabs_f
-
-ggplotly(gf)
-```
-
-###  alternative and nuclear energy (% of total energy use)
-```{r alternative_nuclear}
-WDIsearch(string = "Alternative and nuclear energy",
-          field = "name",
-          short = FALSE)
-
-dtnuclear <- data.table(
-  WDI(country = c("TR"),
-      indicator="EG.USE.COMM.CL.ZS",
-      start = 1996,
-      end= 2020,
-      extra = FALSE)
-)
- head(dtnuclear)
-clabs1 <-   labs(title = "Alternative and Nuclear Energy (% of total energy use)",
-                subtitle = "Turkey",
-                x = "Years", y = "Alt. and Nuc. Energy",
-                caption = "Source: World Bank")
-
-
-g4 <- ggplot(dtnuclear, aes(year, EG.USE.COMM.CL.ZS)) + geom_line() +scale_y_log10()+ my_theme() + clabs1
-g5 <- ggplot(dtnuclear, aes(year, EG.USE.COMM.CL.ZS)) + geom_line() + my_theme() + clabs1
-```
-
-```{r, results=T}
-ggplotly(g4)
-ggplotly(g5)
-```
-
-### bu noktada karşılaştırma yapalım (middle esat and north africa)
-```{r compare_ME_NA}
-dtnuclear2 <- data.table(
-  WDI(country = c("MEA"),
-      indicator="EG.USE.COMM.CL.ZS",
-      start = 1996,
-      end= 2020,
-      extra = FALSE)
-)
-
-DTnuc2 <- merge(dtnuclear, dtnuclear2, by = "year", all.x = TRUE, all.y = T)
-head(DTnuc2)
-
-clabsnuc <-   labs(title = "Alternative and Nuclear Energy (% of total energy use)",
-                 subtitle = "Turkey and Middle East and North Africa",
-                 x = "Years", y = "Alt. and Nuc. Energy(%)",
-                 caption = "Source: World Bank")
-
-g6 <- ggplot(DTnuc2, mapping = aes(x = year)) + geom_bar(aes(y = EG.USE.COMM.CL.ZS.x, color= "Turkey"), stat ="identity",position =position_dodge())+
-  geom_line(size = 1, mapping = aes(y = EG.USE.COMM.CL.ZS.y, color = "Middle East & North Africa")) + my_theme() +
-  guides(col = guide_legend(""))+ clabsnuc
-```
-
-```{r, results=T}
-ggplotly(g6)
-```
-
-### bir de middle income grupla karşılaştıralım
-```{r compare_MI}
-dtnuclear3 <- data.table(
-  WDI(country = c("MIC"),
-      indicator="EG.USE.COMM.CL.ZS",
-      start = 1996,
-      end= 2020,
-      extra = FALSE)
-)
-
-DTnuc3 <- merge(dtnuclear, dtnuclear3, by = "year", all.x = TRUE, all.y = T)
-head(DTnuc3)
-
-clabsnuc3 <-   labs(title = "Alternative and Nuclear Energy (% of total energy use)",
-                   subtitle = "Turkey and Middle Income",
-                   x = "Years", y = "Alt. and Nuc. Energy",
-                   caption = "Source: World Bank")
-
-head(DTnuc3)
-g7 <- ggplot(DTnuc3, mapping = aes(x = year)) + 
-  geom_line(size = 1, mapping = aes(y = EG.USE.COMM.CL.ZS.x, color = "Turkey")) +
-  geom_line(size = 1, mapping = aes(y = EG.USE.COMM.CL.ZS.y, color = "Middle Income")) + 
-  my_theme() +
-  guides(col = guide_legend("")) + 
-  clabsnuc3
-
-g8 <- ggplot(DTnuc3, mapping = aes(x = year)) + 
-  geom_bar(aes(y = EG.USE.COMM.CL.ZS.x, color ="Turkey"), stat ="identity",position =position_dodge()) +
-  geom_line(size = 1, mapping = aes(y = EG.USE.COMM.CL.ZS.y, color = "Middle Income")) + 
-  my_theme() +
-  guides(col = guide_legend(""))+ 
-  clabsnuc3
-```
-
-```{r, results=T}
-ggplotly(g7)
-ggplotly(g8)
-```
-
-###  energy imports,net(% of energy use)
-```{r energy_imports}
-WDIsearch(string = "energy imports",
-          field = "name",
-          short = FALSE)
-
-dtimport <- data.table(
-  WDI(country = c("TR"),
-      indicator="EG.IMP.CONS.ZS",
-      start = 1996,
-      end= 2020,
-      extra = FALSE)
-)
-head(dtimport)
-clabso <-   labs(title = "Energy Imports,net(% of energy use)",
-                 subtitle = "Turkey and OECD",
-                 x = "Years", y = "Enegy Import",
-                 caption = "Source: World Bank")
-dtimportoecd <- data.table(
-  WDI(country = c("OED"),
-      indicator="EG.IMP.CONS.ZS",
-      start = 1996,
-      end= 2020,
-      extra = FALSE))
-DTimport <- merge(dtimport, dtimportoecd, by = "year", all.x = TRUE, all.y = T)
-head(DTimport)
-
-g9 <- ggplot(DTimport, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.x, color = "Turkey"))+
-  geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.y, color = "OECD")) + my_theme() +
-  guides(col = guide_legend(""))+ clabso
-
-g10 <- ggplot(DTimport, mapping = aes(x = year)) + geom_bar(aes(y = EG.IMP.CONS.ZS.x, color= "Turkey"), stat ="identity",position =position_dodge())+
-  geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.y, color = "OECD")) + my_theme() +
-  guides(col = guide_legend(""))+ clabso
-```
-
-```{r, results=T}
-ggplotly(g9)
-ggplotly(g10)
-```
-### middle income ile karşılaştıralım
-```{r compare_mi2}
-
-dtimportmid <- data.table(
-  WDI(country = c("MIC"),
-      indicator="EG.IMP.CONS.ZS",
-      start = 1996,
-      end= 2020,
-      extra = FALSE))
-DTimport2 <- merge(dtimport, dtimportmid, by = "year", all.x = TRUE, all.y = T)
-head(DTimport2)
-clabsx <-   labs(title = "Energy Imports,net(% of energy use)",
-                 subtitle = "Turkey and Middle Income",
-                 x = "Years", y = "Enegy Import",
-                 caption = "Source: World Bank")
-g11 <- ggplot(DTimport2, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.x, color = "Turkey"))+
-  geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.y, color = "Middle Income")) + my_theme() +
-  guides(col = guide_legend(""))+ clabsx
-ggplotly(g11)
-```
-
-```{r, results=T}
-ggplotly(g11)
-```
-
-###  bir de dünya ile karşılaştıralım
-```{r compare__world}
-dtimportworld <- data.table(
-  WDI(country = c("WLD"),
-      indicator="EG.IMP.CONS.ZS",
-      start = 1996,
-      end= 2020,
-      extra = FALSE))
-DTimport3 <- merge(dtimport, dtimportworld, by = "year", all.x = TRUE, all.y = T)
-head(DTimport3)
-
-clabs3 <-   labs(title = "Energy Imports,net(% of energy use)",
-                 subtitle = "Turkey and World",
-                 x = "Years", y = "Enegy Import",
-                 caption = "Source: World Bank")
-
-
-g12 <- ggplot(DTimport3, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.x, color = "Turkey"))+
-  geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.y, color = "World")) + my_theme() +
-  guides(col = guide_legend(""))+ clabs3
-
-g13 <- ggplot(DTimport3, mapping = aes(x = year)) + geom_bar(aes(y = EG.IMP.CONS.ZS.x, color="Turkey"), stat ="identity",position =position_dodge())+
-  geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.y, color = "World")) + my_theme() +
-  guides(col = guide_legend(""))+ clabs3
-```
-
-```{r, results=T}
-ggplotly(g12)
-ggplotly(g13)
-```
-
-### electricity production from... (% of total)
-```{r electricit_prod}
-WDIsearch(string = "electricity production from",
-          field = "name",
-          short = FALSE)
+line1 <- ggplot(dtproduction1, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = EG.ELC.FOSL.ZS, color = "Fossil"))+
+  geom_line(size = 1, mapping = aes(y = EG.ELC.NUCL.ZS, color = "nuclear")) +
+  geom_line(size = 1, mapping = aes(y = EG.ELC.RNWX.ZS, color = "renewable"))+
+  geom_line(size = 1, mapping = aes(y = EG.ELC.HYRO.ZS, color = "hydroelectric")) +
+  guides(col = guide_legend("")) +clabsel + my_theme()
 
 dtproduction <- data.table(
   WDI(country = c("TR"),
@@ -383,322 +98,82 @@ dtproduction <- data.table(
       extra = FALSE)
 )
 clabsel <-   labs(title = "Electricity production from sources(% of total)",
+                  subtitle = "Turkey",
+                  x = "Years", y = "Sources",
+                  caption = "Source: World Bank")
+
+line2 <- ggplot(dtproduction, mapping = aes(x = year)) + 
+  geom_line(size = 0.8, mapping = aes(y = EG.ELC.PETR.ZS, color = "Oil"))+
+  geom_line(size = 0.8, mapping = aes(y = EG.ELC.NGAS.ZS, color = "Natural Gas")) +
+  geom_line(size = 0.8, mapping = aes(y = EG.ELC.COAL.ZS, color = "Coal"))+
+  geom_line(size = 0.8, mapping = aes(y = EG.ELC.HYRO.ZS, color = "Hydroelectric")) +
+  guides(col = guide_legend("")) +clabsel + my_theme()
+
+
+```
+
+Energy consumption inevitably grows in parallel with the increasing population, urbanization, industrialization, widespread use of technology, and increased welfare. Hence, electric energy, which has become an indispensable need for human beings, has become a part of our daily life in many respects. Today to protect living standards, we need electrical energy in many sectors such as housing, industry, and transportation. The search for new energy sources for the generation of electricity has increased rapidly due to the economically inexpensive and environmentally friendly production of electrical energy. We can examine the methods commonly used to generate electrical power with current technologies in three main groups.
+
+i) Fossil fuels (coal, oil, natural gas, etc.)
+
+ii) Nuclear reactors
+
+iii) Renewable energy sources
+
+Despite using these three ways for electricity production in the world different from this situation in Turkey. As it can be seen below, when we look at electricity production from renewable sources (excluding hydroelectric), fossil sources (oil, gas, and coal), nuclear sources, and hydroelectric sources together, we observe that while the largest share is fossil fuels, nuclear and renewable sources have an incomparably small percentage in Turkey.
+
+```{r, results=T, out.width="100%"}
+ggplotly(line1)
+```
+                            Source: World Bank
+                            
+To investigate electricity energy production in Turkey, we will focus on the two most used sources are fossil and hydroelectric.  For this, we will get benefit from both the World Bank database and The Republic of Turkey's annual plans. While the first graph shows electricity production sources, the second one shows the frequency of using these in yearly plans.
+
+```{r freqs}
+clabs_f <-   labs(title = "Electricity production from sources(% of total) (Left) & Frequencies (Right)",
                  subtitle = "Turkey",
                  x = "Years", y = "Sources",
-                 caption = "Source: World Bank")
-
-g14 <- ggplot(dtproduction, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = EG.ELC.PETR.ZS, color = "Oil"))+
-  geom_line(size = 1, mapping = aes(y = EG.ELC.NGAS.ZS, color = "natural gas")) +
-  geom_line(size = 1, mapping = aes(y = EG.ELC.COAL.ZS, color = "Coal"))+
-  geom_line(size = 1, mapping = aes(y = EG.ELC.HYRO.ZS, color = "hydroelectric")) +my_theme() +
-  guides(col = guide_legend("")) +clabsel
-```
-
-```{r, results=T}
-ggplotly(g14)
-```
-
-### fossil fuel energy consumption (% of total)
-```{r fossil_fuel}
-WDIsearch(string = "electricity production from",
-          field = "name",
-          short = FALSE)
-
-dtfossil1 <- data.table(
-  WDI(country = c("TR"),
-      indicator="EG.IMP.CONS.ZS",
-      start = 1996,
-      end= 2020,
-      extra = FALSE))
-
-dtfossil2 <- data.table(
-  WDI(country = c("MIC"),
-      indicator="EG.IMP.CONS.ZS",
-      start = 1996,
-      end= 2020,
-      extra = FALSE))
-
-DTfossil <- merge(dtfossil1, dtfossil2, by = "year", all.x = TRUE, all.y = T)
-
-clabs4 <-   labs(title = "Fossil Fuel Energy Consumption (% of total)",
-                 subtitle = "Turkey and Middle Income Countries",
-                 x = "Years", y = "Condumption",
-                 caption = "Source: World Bank")
-
-head(DTfossil)
-g15 <- ggplot(DTfossil, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.x, color = "Turkey"))+
-  geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.y, color = "Middle Income")) + my_theme() +
-  guides(col = guide_legend(""))+ clabs4
-
-g16 <- ggplot(DTfossil, mapping = aes(x = year)) + geom_bar(aes(y = EG.IMP.CONS.ZS.x, color ="Turkey"), stat ="identity",position =position_dodge())+
-  geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.y, color = "OECD")) + my_theme() +
-  guides(col = guide_legend(""))+ clabs4
-```
-
-```{r, results=T}
-ggplotly(g15)
-ggplotly(g16)
-```
-
-### bir de Europe & Central Asia ile karşılaştıralım
-```{r compare_europe_ca}
-dtfossil3 <- data.table(
-  WDI(country = c("ECS"),
-      indicator="EG.IMP.CONS.ZS",
-      start = 1996,
-      end= 2020,
-      extra = FALSE))
-
-DTfossil2 <- merge(dtfossil1, dtfossil3, by = "year", all.x = TRUE, all.y = T)
-
-clabs5 <-   labs(title = "Fossil Fuel Energy Consumption (% of total)",
-                 subtitle = "Turkey and Europe & Central Asia",
-                 x = "Years", y = "Consumption",
-                 caption = "Source: World Bank")
-
-head(DTfossil2)
-g17 <- ggplot(DTfossil2, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.x, color = "Turkey"))+
-  geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.y, color = "Europe & Central Asia")) + my_theme() +
-  guides(col = guide_legend(""))+ clabs5
-```
-
-```{r, results=T}
-ggplotly(g17)
-```
-
-###  tek başına türkiye daha anlamlı
-```{r turkey}
-g18 <- ggplot(DTfossil2, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = EG.IMP.CONS.ZS.x, color = "Turkey"))+
-  my_theme()+ clabs5
-```
-
-```{r, results=T}
-ggplotly(g18)
-```
-
-###  combustible renewable and waste (% of total)
-```{r combustible_renewable_and_waste}
-WDIsearch(string = "Combustible renewable",
-          field = "name",
-          short = FALSE)
-
-dtwaste <- data.table(
-  WDI(country = c("TR"),
-      indicator="EG.USE.CRNW.ZS",
-      start = 1996,
-      end= 2020,
-      extra = FALSE)
-)
-head(dtwaste)
-
-
-clabs <-   labs(title = "Combustible Renewable and Waste (% of total)",
-                subtitle = "Turkey",
-                x = "Years", y = "",
-                caption = "Source: World Bank")
-
-g19 <- ggplot(dtwaste, aes(year, EG.USE.CRNW.ZS)) + geom_line() + my_theme() + clabs
-```
-
-```{r, results=T}
-ggplotly(g19)
-```
-
-### gdp growth ve yenilenebilir enerji tüketimi (%)
-```{r renewable_energy_consumption}
-WDIsearch(string = "renewable energy",
-          field = "name",
-          short = FALSE)
-
-dfrenew <- data.table(
-  WDI(country = c("TR"),
-      indicator="2.1_SHARE.TOTAL.RE.IN.TFEC",
-      start = 1996,
-      end= 2020,
-      extra = FALSE)
-)
-head(dfrenew)
+                 caption = "Source: Annual Plans")
+gf <- ggplot(freqsDT, mapping = aes(x = Years)) +
+  geom_point(size = 1, mapping = aes(y = petrol, color= "Oil"))+
+  geom_point(size = 1, mapping = aes(y = gaz, color = "Natural Gas")) +
+  geom_point(size = 1, mapping = aes(y = kömür, color = "Coal")) +
+  geom_point(size = 1, mapping = aes(y = hidroelektrik, color = "Hydroelectric")) +
+  my_theme() +
+  scale_x_discrete(breaks=c(1995,2000,2005,2010,2015,2020))+
+  guides(col = guide_legend("")) + clabs_f
 
 ```
 
-```{r gdp_growth}
-WDIsearch(string = "GDP growth",
-          field = "name",
-          short = FALSE)
+```{r, results=T, figures-side, fig.show="hold", out.width="100%"}
 
-dtgdp <- data.table(
-  WDI(country = c("TR"),
-      indicator="NY.GDP.MKTP.KD.ZG",
-      start = 1996,
-      end= 2020,
-      extra = FALSE)
-)
-
-head(dfrenew)
-
-setnames(dfrenew, c("2.1_SHARE.TOTAL.RE.IN.TFEC"), c("renew"))
-
-head(dfrenew)
-
-head(dtgdp)
-setnames(dtgdp, c("NY.GDP.MKTP.KD.ZG"), c("gdp"))
-head(dtgdp)
-tail(dtgdp)
+p2<- subplot(
+  add_trace(line2), 
+  add_trace(gf),
+  margin = 0.05)
+p2
 ```
 
-```{r GDP_Growth_and_Renewable_Energy_Consumption}
-DT8 <- merge(dfrenew,dtgdp , by = "year", all.x = TRUE, all.y = T)
-head(DT8)
-clabs8 <-   labs(title = "GDP Growth and Renewable Energy Consumption (% of TFEC)",
-                subtitle = "Turkey",
-                x = "Years", y = "(%)",
-                caption = "Source: World Bank")
+When we start analyzing the second graph from 1996, we observe that the use of oil word has an increasing trend, which means oil may have a decisive influence on energy policies from 1996 to 2002. It is not surprising that oil is discussed in energy policies during this period because although oil demand decreased due to the crisis in 1997 in Asian markets, OPEC increased the supply of oil, which ineluctably caused a decline in oil price. However, when we look at the first graph, we see that; The share of oil for electricity production in Turkey is relatively low and has a declining trend is moving in a straight line can be called stabile. The main reasons for the low share of oil for electricity generation, even though it is mentioned a lot in the annual program, are the volatility of oil prices and high production costs.
+
+
+Apart from the oil source, which has an increasing slope, natural gas also strikes our eyes in the second graph. Natural gas has a special place and importance in the electricity sector. It is beneficial to continue the consumption development of natural gas, which is preferred due to its advantages in terms of price, efficiency, and environment, with a healthy understanding considering the principles of planning and resource diversity. And the first graph supports this. Between 1996 and 2001, we see that the source with the largest percentage is hydroelectricity, but it has a declining trend. On the other hand, natural gas has a rapid upward trend as an electricity generation source again for the same period. There are multiple reasons for this situation:
+
+1.	Natural gas is essential in terms of security of supply as a backup solution to the problem of energy supply shortage because it can react quickly to electricity demand changes.
+
+2.	Natural gas power plants have relatively low investment costs and fast installation times.
+
+3.	In 1998, significant steps were taken in natural gas connections to meet the increasing energy demand.
+
+Therefore, after 1999 we observe that natural gas has the most significant share in Turkey's electricity production.
+
+When we continue with hydroelectric, which is the only renewable energy source used in an active form in Turkey, in the second graph hydroelectricity keeps its place in energy policies.However, we observe a sharp decline from 1996 to 2001 in the first graph. Then even if there are ups and downs in the following years, its share tends to decrease. The main reason behind this is related to being insufficient in investments. "Build-Operate-Transfer" and "Build-Operate" models were proposed to solve the problems arising in ensuring sustainability in energy investments. With those two models, it was aimed to find investors and encourage the private sector. However, this policy couldn’t reach the desired result. Even if hydroelectric power generation is the best source for Turkey, in recent years, the destruction of the forest ecosystem for establishing hydroelectric power plants has met with great public reaction.
+
+Lastly, when we look at coal, we see very stable progress in both of the graphs. Even though there are ups and downs in the first graph, coal keeps its share around 30% between 1996 and 2015. There is a very similar case in the second graph; coal keeps its place in energy policies.
 
 
 
-g20 <- ggplot(DT8, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = renew, color = "renewable energy consumption"))+
-  geom_line(size = 1, mapping = aes(y = gdp, color = "GDP Growth")) + my_theme() + guides(col = guide_legend(""))+ clabs8
-
-
-g21 <-ggplot(DT8, mapping = aes(x = year)) + geom_bar(aes(y = renew, color ="Renewable Energy Cons.(%)"), stat ="identity",position =position_dodge())+
-  geom_line(size = 1, mapping = aes(y = gdp, color = "GDP Growth(%)")) + my_theme() +
-  guides(col = guide_legend(""))+ clabs8
-
-```
-
-```{r, results=T}
-ggplotly(g20)
-ggplotly(g21)
-```
-
-###  D-Elektrik, gaz, buhar ve iklimlendirme üretimi ve dağıtımı-Düzey Sanayi Üretim Endeksi (2015=100)(TÜİK)
-```{r Electricity_gas_steam_and_air_conditioning_supply}
-endex <- getDataSeries("TP.SANAYREV4.Y41", CBRTKey= "APA7ENywLk",freq =6, startDate = "01-01-2005", endDate = "01-10-2020",na.rm =T)
-
-class(endex)
-head(endex)
-setnames(endex, c("time", "TP.SANAYREV4.Y41"), c("year", "index"))
-
-clabs <-   labs(title = "Electricity, gas, steam and air conditioning supply",
-                subtitle = "Turkey",
-                x = "Years", y = "",
-                caption = "Source: CBRT")
-
-g22 <- ggplot(endex, aes(year, index)) + geom_line() + my_theme() + clabs
-```
-
-```{r, results=T}
-ggplotly(g22)
-```
-
-###  Fiyat Endeksi-Özel Kapsamlı TÜFE Göstergeleri (2003=100)(TÜİK)
-enerji
-```{r Consumer_Price_Index}
-energy <-  getDataSeries("TP.FE.OKTG07", CBRTKey= "APA7ENywLk",freq =6, startDate = "01-01-2003", endDate = "01-12-2020",na.rm =T)
-
-class(energy)
-head(energy)
-setnames(energy, c("time", "TP.FE.OKTG07"), c("year", "energy"))
-
-clabse <-   labs(title = "Consumer Price Index-Indicators for the CPI's Having Specified Coverages (2003=100)",
-                subtitle = "Turkey",
-                x = "Years", y = "Energy",
-                caption = "Source: CBRT")
-
-g23 <- ggplot(energy, aes(year, energy)) + geom_line() + my_theme() + clabse
-
-```
-
-```{r, results=T}
-ggplotly(g23)
-```
-
-###  gdp growth ile eneergy indexi olmadı bir arada aşağıda görülüyor
-```{r gdp_growth_energy_index}
-GDPT <- getDataSeries("TP.GSYIH26.HY.ZH", CBRTKey= "APA7ENywLk",freq =6, startDate = "01-01-1998", endDate = "01-07-2020",na.rm =T)
-class(GDPT)
-head(GDPT)
-setnames(GDPT, c("time", "TP.GSYIH26.HY.ZH"), c("year", "GDP"))
-head(GDPT)
-GDPT[, GDP_Growth := 100*(GDP - shift(GDP, n = 4L))/shift(GDP, n = 4L)]
-head(GDPT)
-
-DTenergy <- merge(energy, GDPT, by = "year", all.x = TRUE, all.y = T)
-head(DTenergy)
-
-clabs <-   labs(title = "GDP Growth and Energy Index",
-                subtitle = "Turkey",
-                x = "Years", y = "GDP Growth Rate and Energy Index",
-                caption = "Source: CBRT")
-g24 <- ggplot(DTenergy, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = energy, color = "Energy Index"))+
-  geom_line(size = 1, mapping = aes(y = GDP_Growth, color = "GDP Growth")) + my_theme() + guides(col = guide_legend(""))+ 
-  clabs 
-
-```
-
-```{r, results=T}
-ggplotly(g24)
-```
-
-###  enerji ithalat ihracat ,çeyreklik
-Enerji (27. Fasıl) İhracat (Milyon ABD doları)
-Enerji (27. Fasıl) İhracat (Milyon ABD doları)-Düzey Cari İşlemler Hesabı, Parasal Olmayan Altın ve Enerji Dış Ticareti (Milyon ABD doları)
-```{r energy_import_export}
-ihracat <-  getDataSeries("TP.HARICCARIACIK.K5", CBRTKey= "APA7ENywLk",freq =6, startDate = "01-01-1996", endDate = "01-12-2020",na.rm =T)
-head(ihracat)
-setnames(ihracat, c("time", "TP.HARICCARIACIK.K5"), c("year", "export"))
-
-ithalat <- getDataSeries("TP.HARICCARIACIK.K6", CBRTKey= "APA7ENywLk",freq =6, startDate = "01-01-1996", endDate = "01-12-2020",na.rm =T)
-head(ithalat)
-setnames(ithalat, c("time", "TP.HARICCARIACIK.K6"), c("year", "import"))
-
-DTimex <- merge(ithalat, ihracat, by = "year", all.x = TRUE, all.y = T)
-head(DTimex)
-
-clabsimex <-   labs(title = "Energy Import and Export",
-                subtitle = "Turkey",
-                x = "Years", y = "",
-                caption = "Source: CBRT")
-g25 <- ggplot(DTimex, mapping = aes(x = year)) + geom_line(size = 1, mapping = aes(y = import, color = "Energy Import"))+
-  geom_line(size = 1, mapping = aes(y = export, color = "Energy Export")) + my_theme() + guides(col = guide_legend(""))+ 
-  clabsimex + scale_y_log10()
-
-
-```
-
-```{r, results=T}
-ggplotly(g25)
-```
-
-###  yearly data ile de yaptım bu daha iyi oldu
-```{r energy_import_export_yearly}
-ihracat1 <-  getDataSeries("TP.HARICCARIACIK.K5", CBRTKey= "APA7ENywLk",freq =12, startDate = "01-01-1996", endDate = "01-12-2020",na.rm =T)
-head(ihracat1)
-setnames(ihracat1, c("time", "TP.HARICCARIACIK.K5"), c("year", "export"))
-
-ithalat1 <- getDataSeries("TP.HARICCARIACIK.K6", CBRTKey= "APA7ENywLk",freq =12, startDate = "01-01-1996", endDate = "01-12-2020",na.rm =T)
-head(ithalat1)
-setnames(ithalat1, c("time", "TP.HARICCARIACIK.K6"), c("year", "import"))
-
-DTimex1 <- merge(ithalat1, ihracat1, by = "year", all.x = TRUE, all.y = T)
-head(DTimex1)
-
-
-clabsimex1 <-   labs(title = "Energy Import and Export",
-                    subtitle = "Turkey",
-                    x = "Years", y = "Import",
-                    caption = "Source: CBRT")
-
-g26 <- ggplot(DTimex1, mapping = aes(x = year)) + geom_bar(aes(y = import, color = " Import"), stat ="identity",position =position_dodge())+
-  geom_line(size = 1, mapping = aes(y = export, color = "Export")) +my_theme() +clabsimex1
-
-```
-
-```{r, results=T}
-ggplotly(g26)
-```
-
-###  graphs
+## Relationship Between Energy Consumption and Current Account Balance & Manufacturing
 ```{r final_graphs}
 aa <-WDIsearch("current account")
 bb <-WDIsearch("manufacturing")
@@ -730,20 +205,6 @@ dt2 <- merge(manufTR, energconsTR, by.x = "year", by.y = "year")
 
 #Visualization--------- 
 
-mytheme <- function()  { theme_bw()   + 
-      theme(panel.border = element_rect(color = "gray70", size = 1.5)) +
-      theme(legend.position = "none") +
-      theme(plot.caption = element_text(color = "blue4", size = rel(1))) +
-      theme(panel.background = element_rect(fill = "mintcream", colour = "gray70"), panel.grid = element_line(colour ="gray70"), 
-            panel.grid.minor = element_line(size = rel(0.5)), 
-            strip.background = element_rect(fill = "mintcream", 
-                                            colour = "gray70"), complete = TRUE) +theme(axis.title.x= element_text(color = "blue4", size = rel(1.1)),
-                                                                                        axis.title.y = element_text(color = "blue4", size = rel(1.1))) + 
-      theme(plot.title = element_text(color = "blue4", size = rel(1.5))) + 
-      theme(axis.text.x= element_text(color = "blue4",size = rel(0.9)),
-            axis.text.y = element_text(color = "blue4",size = rel(0.9))) +
-      theme(legend.text = element_text(size = rel(0.8), color = "blue4"))}
-
 labss1 <- labs(title = "Relationship Between Current Account Balance and Energy Consumption",
               x = "Energy Consumption", y = "Current Account Balance (in million)",
               caption = "Source: WorldBank")
@@ -752,15 +213,75 @@ labss2 <- labs(title = "Relationship Between Manufacturing and Energy Consumptio
                x = "Energy Consumption", y = "Manufacturing",
                caption = "Source: WorldBank")
 
-bardiag <- ggplot(data = dt1, aes(x=energy, y = cab , color= year )) +geom_point()  +labss1 +mytheme() +
+bardiag <- ggplot(data = dt1, aes(x=energy, y = cab , color= year )) +geom_point()  +labss1 +my_theme() +
   geom_smooth(method = "lm", se=F, color="purple") +scale_y_continuous(labels = comma)
 
-bardiagg <- ggplot(data = dt2, aes(x=energy, y = manuf , color= year )) +geom_point()  +labss2 +mytheme() +
+bardiagg <- ggplot(data = dt2, aes(x=energy, y = manuf , color= year )) +geom_point()  +labss2 +my_theme() +
   geom_smooth(method = "lm", se=F, color="purple") +scale_y_continuous(labels = comma)
 ```
 
-```{r results=TRUE}
-ggplotly(bardiag)
+We know from other researches that, while the increase in electricity consumption causes economic growth, the increase in energy consumption based on imports used in electricity production affects the CAB and causes a current account deficit. Also, we know that energy use of industrial (manufacturing) sector has highest share in electric consumption of Turkey. (Oğulata,2020) Therefore, in this part we examine both the relationship between current account balance and energy consumption, and the relationship between manufacturing and energy consumption
+
+```{r results=TRUE, fig.width=9, fig.height=6}
 ggplotly(bardiagg)
 ```
+
+The graph shows that there is a positive relationship between manufacturing and energy consumption. This is an expected result that is not so surprising. Because of the energy consumption of industry has a highest share, while the manufacturing activities increase, electric consumption also increases.
+
+
+```{r results=TRUE, fig.width=9, fig.height=6}
+ggplotly(bardiag)
+```
+
+The graph shows that there is a negative relationship between current account balance (CAB) and energy consumption. This is an also an expected result, because Turkey’s energy production meets approximately %48 of the total primary energy demand. Therefore, our energy sector depends on imports, which deteriotes CAB of Turkey. 
+When these results are taken into account, it has been revealed that electricity should be produced by using national energy resources in order to ensure economic growth and to increase the amount of electricity consumption and prevent the current account deficit. Turkey is scarce natural resources, so to overcome the current account deficit and to ensure a stable economic growth renewable energy sources could be used such as wind, wave, solar and so on. Green energy facilities or other energy generation facilities should be considered.  (Gökten and Karatepe, 2016)
+
+## Relationship Between Renewable Enegry and GDP per Capita
+
+```{r renewable}
+elecTR <-WDI(country = "TR", indicator = "4.1.2_REN.ELECTRICITY.OUTPUT", start = 1996, end = 2020 )
+
+renewTR <- WDI(country = "TR", indicator = "NY.GDP.PCAP.KD", start = 1996, end = 2020)
+
+old1 <- c("iso2c", "country", "4.1.2_REN.ELECTRICITY.OUTPUT", "year")
+old2 <- c("iso2c", "country", "NY.GDP.PCAP.KD", "year")
+
+
+setnames(elecTR,old1, c("isocode", "country", "electric", "year"))
+setnames(renewTR, old2, c("isocode", "country", "renewable", "year"))
+
+
+dataa <- merge(elecTR, renewTR, by.x = "year", by.y = "year")
+```
+
+```{r renewable graph }
+labss1 <- labs(title = "Relationship Between Renewable Enegry and GDP per Capita",
+               x = "Renewable energy electricity output (GWh)", y = "GDP per capita (constant 2010 US$)",
+               caption = "Source: WorldBank")
+
+
+bardiag <- ggplot(data = dataa, aes(x= electric, y = renewable, color= year )) +geom_point() +my_theme() +
+  geom_smooth(method = "lm",se=F, color="purple") +scale_y_continuous(labels = comma) +labss1
+
+```
+
+```{r, results=T,  fig.width=9, fig.height=6}
+ggplotly(bardiag)
+```
+
+
+Renewable energy on the global scale has experienced significant developments especially in the last 15 years. 
+
+Turkey wants to improve the high rate of economic growth of recent years which has been caught in sustainability is dependent on foreign supplies around 70% of primary energy sources. In other words, addiction is a threat to economic independence from time to time. For this reason, new and alternative energy sources are needed to meet the increasing energy needs. 
+
+As of 2020, Turkey's renewable energy installed capacity is 52.429 MW. The highest share among the renewable energy sources belongs to hydraulic energy with 60.4%, which means 31.688 MW. This is followed by wind with 9.633 MW, sun with 7.750MW, and others with 3.358 MW. Given these data, the share of renewable energy in the total energy consumption of Turkey has amounted to 34.39%. 
+
+The sharing of renewable energy sources has been increasing by every year. As we can see at graph, while GDP per capita is increasing, using of renewable energy is also increasing. However, this relation is not a strong positive relation because in developing countries, renewable energy may not be priority for them, when income increases; they may prefer to make investment related to health, education and other important areas rather than energy sector. Moreover, even they prefer to make energy investment, for low income countries, economic growth may be much more important compared to environmental sustainability, as fossil fuels are much more cost competitive compared to renewables, fossil fuels can be used to promote economic growth.
+
+
+## References
+Karatepe, S. G. (2016). Electricity consumption and economic growth:A causality analysis for Turkey in the frame of import-based energy consumption and current account deficit. Energy Sources, Part B: Economics, Planning, and Policy, 385-389.
+
+Oğulata, T. (2020). Sectoral energy consumption in Turkey. Renewable and Sustainable Energy Reviews.
+
 
